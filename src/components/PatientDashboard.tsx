@@ -1,10 +1,11 @@
-
 import { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { useNavigate } from 'react-router-dom';
 
 const PatientDashboard = () => {
+  const navigate = useNavigate();
   const [appointments] = useState([
     { id: 1, doctor: 'Dr. Sarah Johnson', specialty: 'Cardiology', date: '2024-01-15', time: '10:00 AM', status: 'upcoming' },
     { id: 2, doctor: 'Dr. Michael Chen', specialty: 'Dermatology', date: '2024-01-20', time: '2:30 PM', status: 'upcoming' },
@@ -23,6 +24,26 @@ const PatientDashboard = () => {
         <div className="mb-8">
           <h1 className="text-3xl font-bold text-gray-900 mb-2">Patient Dashboard</h1>
           <p className="text-gray-600">Welcome back! Manage your healthcare journey.</p>
+        </div>
+
+        {/* Emergency Services Quick Access */}
+        <div className="mb-8">
+          <Card className="bg-red-600 text-white border-0">
+            <CardContent className="p-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h3 className="text-xl font-bold mb-2">Emergency Services</h3>
+                  <p className="text-red-100">Need blood or ambulance? Get immediate help</p>
+                </div>
+                <Button
+                  onClick={() => navigate('/emergency-services')}
+                  className="bg-white text-red-600 hover:bg-red-50 font-semibold px-6 py-3"
+                >
+                  Access Now
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
         </div>
 
         <div className="grid lg:grid-cols-4 gap-6 mb-8">
