@@ -63,16 +63,14 @@ export default {
 					border: 'hsl(var(--sidebar-border))',
 					ring: 'hsl(var(--sidebar-ring))'
 				},
-				healthcare: {
-					blue: '#3B82F6',
-					'blue-light': '#EBF4FF',
-					'blue-dark': '#1E40AF',
-					green: '#10B981',
-					'green-light': '#ECFDF5',
-					red: '#EF4444',
-					'red-light': '#FEF2F2',
-					gray: '#6B7280',
-					'gray-light': '#F9FAFB'
+				arogya: {
+					'dark-green': '#013c22',
+					'light-green': '#013a20',
+					'beige-yellow': '#cdd193',
+					'teal': '#093e43',
+					'light-blue': '#c9e6e8',
+					'dark-teal': '#083236',
+					'light-teal': '#20646a'
 				}
 			},
 			borderRadius: {
@@ -106,12 +104,23 @@ export default {
 						opacity: '1',
 						transform: 'translateY(0)'
 					}
+				},
+				'slide-up': {
+					'0%': {
+						opacity: '0',
+						transform: 'translateY(20px)'
+					},
+					'100%': {
+						opacity: '1',
+						transform: 'translateY(0)'
+					}
 				}
 			},
 			animation: {
 				'accordion-down': 'accordion-down 0.2s ease-out',
 				'accordion-up': 'accordion-up 0.2s ease-out',
-				'fade-in': 'fade-in 0.3s ease-out'
+				'fade-in': 'fade-in 0.3s ease-out',
+				'slide-up': 'slide-up 0.5s ease-out'
 			}
 		}
 	},
