@@ -10,7 +10,11 @@ import Signup from "./pages/Signup";
 import PatientDashboard from "./components/PatientDashboard";
 import DoctorDashboard from "./components/DoctorDashboard";
 import EmergencyServices from "./pages/EmergencyServices";
+import AdminPanel from "./pages/AdminPanel";
+import MyHealthRecords from "./pages/MyHealthRecords";
+import Team from "./pages/Team";
 import NotFound from "./pages/NotFound";
+import Chatbot from "./components/Chatbot";
 
 const queryClient = new QueryClient();
 
@@ -27,8 +31,12 @@ const App = () => (
           <Route path="/patient-dashboard" element={<PatientDashboard />} />
           <Route path="/doctor-dashboard" element={<DoctorDashboard />} />
           <Route path="/emergency-services" element={<EmergencyServices />} />
+          <Route path="/admin-panel" element={<AdminPanel />} />
+          <Route path="/my-health-records" element={<MyHealthRecords />} />
+          <Route path="/team" element={<Team />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
+        <Chatbot />
       </BrowserRouter>
     </TooltipProvider>
   </QueryClientProvider>

@@ -1,3 +1,4 @@
+
 import { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -40,6 +41,43 @@ const PatientDashboard = () => {
                   className="bg-white text-red-600 hover:bg-red-50 font-semibold px-6 py-3"
                 >
                   Access Now
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* Quick Actions */}
+        <div className="mb-8 grid md:grid-cols-2 gap-4">
+          <Card className="bg-healthcare-blue text-white border-0">
+            <CardContent className="p-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h3 className="text-lg font-bold mb-2">My Health Records</h3>
+                  <p className="text-blue-100">View your complete medical history</p>
+                </div>
+                <Button
+                  onClick={() => navigate('/my-health-records')}
+                  className="bg-white text-healthcare-blue hover:bg-blue-50 font-semibold"
+                >
+                  View Records
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card className="bg-healthcare-green text-white border-0">
+            <CardContent className="p-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h3 className="text-lg font-bold mb-2">Our Team</h3>
+                  <p className="text-green-100">Meet the Arogya Care team</p>
+                </div>
+                <Button
+                  onClick={() => navigate('/team')}
+                  className="bg-white text-healthcare-green hover:bg-green-50 font-semibold"
+                >
+                  Meet Team
                 </Button>
               </div>
             </CardContent>
