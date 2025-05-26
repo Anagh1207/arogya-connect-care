@@ -1,4 +1,5 @@
 
+import React from 'react';
 import { Button } from '@/components/ui/button';
 import { useNavigate } from 'react-router-dom';
 import { User, Search, Calendar, Video, ArrowRight, CheckCircle, Star, Clock } from 'lucide-react';
@@ -12,7 +13,7 @@ const HowItWorks = () => {
       title: 'Sign Up & Profile',
       description: 'Create your account and complete your medical profile with basic information and health history.',
       icon: <User className="w-8 h-8" />,
-      image: '/placeholder.svg',
+      image: 'https://images.unsplash.com/photo-1649972904349-6e44c42644a7?w=400&h=300&fit=crop',
       color: 'from-blue-400 to-blue-600'
     },
     {
@@ -20,7 +21,7 @@ const HowItWorks = () => {
       title: 'Choose Doctor',
       description: 'Browse our network of verified doctors, read reviews, and select the best fit for your needs.',
       icon: <Search className="w-8 h-8" />,
-      image: '/placeholder.svg',
+      image: 'https://images.unsplash.com/photo-1581091226825-a6a2a5aee158?w=400&h=300&fit=crop',
       color: 'from-green-400 to-green-600'
     },
     {
@@ -28,7 +29,7 @@ const HowItWorks = () => {
       title: 'Book Appointment',
       description: 'Schedule your consultation at a time that works for you with instant confirmation.',
       icon: <Calendar className="w-8 h-8" />,
-      image: '/placeholder.svg',
+      image: 'https://images.unsplash.com/photo-1519389950473-47ba0277781c?w=400&h=300&fit=crop',
       color: 'from-purple-400 to-purple-600'
     },
     {
@@ -36,7 +37,7 @@ const HowItWorks = () => {
       title: 'Video Consultation',
       description: 'Connect with your doctor through secure video call and receive professional medical advice.',
       icon: <Video className="w-8 h-8" />,
-      image: '/placeholder.svg',
+      image: 'https://images.unsplash.com/photo-1605810230434-7631ac76ec81?w=400&h=300&fit=crop',
       color: 'from-orange-400 to-orange-600'
     }
   ];
@@ -80,11 +81,11 @@ const HowItWorks = () => {
                 <h3 className="text-xl font-bold text-arogya-dark-teal mb-3">{step.title}</h3>
                 <p className="text-arogya-teal leading-relaxed text-sm">{step.description}</p>
                 
-                <div className="mt-4 w-full h-32 bg-arogya-light-blue/20 rounded-lg flex items-center justify-center">
+                <div className="mt-4 w-full h-32 bg-arogya-light-blue/20 rounded-lg overflow-hidden">
                   <img 
                     src={step.image} 
                     alt={step.title}
-                    className="w-20 h-20 object-contain opacity-60"
+                    className="w-full h-full object-cover"
                   />
                 </div>
               </div>
@@ -114,7 +115,7 @@ const HowItWorks = () => {
             <div className="w-16 h-16 bg-purple-100 rounded-full flex items-center justify-center mx-auto mb-4">
               <Clock className="w-8 h-8 text-purple-600" />
             </div>
-            <h3 className="text-3xl font-bold text-arogya-dark-teal mb-2">< 2 min</h3>
+            <h3 className="text-3xl font-bold text-arogya-dark-teal mb-2">&lt; 2 min</h3>
             <p className="text-arogya-teal">Average Wait Time</p>
           </div>
         </div>
