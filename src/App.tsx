@@ -14,6 +14,7 @@ import AdminPanel from "./pages/AdminPanel";
 import MyHealthRecords from "./pages/MyHealthRecords";
 import Team from "./pages/Team";
 import NotFound from "./pages/NotFound";
+import Subscription from "./pages/Subscription";
 import Chatbot from "./components/Chatbot";
 
 const queryClient = new QueryClient();
@@ -34,6 +35,7 @@ const App = () => (
           <Route path="/admin-panel" element={<AdminPanel />} />
           <Route path="/my-health-records" element={<MyHealthRecords />} />
           <Route path="/team" element={<Team />} />
+          <Route path="/subscription" element={<Subscription />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
         <Chatbot />
