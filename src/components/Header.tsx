@@ -35,10 +35,10 @@ const Header = () => {
 
   const navLinks = [
     { href: '/', label: 'Home', icon: <Heart className="w-4 h-4" /> },
-    { href: '/#services', label: 'Services', icon: <Stethoscope className="w-4 h-4" /> },
+    { href: '/services', label: 'Services', icon: <Stethoscope className="w-4 h-4" /> },
     { href: '/team', label: 'Team', icon: <Users className="w-4 h-4" /> },
     { href: '/emergency-services', label: 'Emergency', icon: <Phone className="w-4 h-4" /> },
-    { href: '/#contact', label: 'Contact', icon: <MessageCircle className="w-4 h-4" /> },
+    { href: '/contact', label: 'Contact', icon: <MessageCircle className="w-4 h-4" /> },
   ];
 
   const userMenuItems = {
@@ -72,9 +72,11 @@ const Header = () => {
             className="flex items-center cursor-pointer group" 
             onClick={() => navigate('/')}
           >
-            <div className="bg-gradient-to-r from-arogya-dark-green to-arogya-light-green text-white p-2.5 rounded-xl mr-3 shadow-md group-hover:shadow-lg transition-all duration-300 group-hover:scale-105">
-              <Heart className="w-6 h-6" />
-            </div>
+            <img 
+              src="/lovable-uploads/ab2f5346-9dbf-46fd-9e64-97bb5022d676.png" 
+              alt="Arogya Care" 
+              className="h-10 w-10 mr-3 group-hover:scale-105 transition-transform duration-300"
+            />
             <span className="text-xl font-bold bg-gradient-to-r from-arogya-dark-teal to-arogya-dark-green bg-clip-text text-transparent">
               Arogya Care
             </span>
@@ -83,9 +85,9 @@ const Header = () => {
           {/* Desktop Navigation */}
           <nav className="hidden md:flex space-x-1">
             {navLinks.map((link) => (
-              <a
+              <button
                 key={link.href}
-                href={link.href}
+                onClick={() => navigate(link.href)}
                 className={`flex items-center space-x-2 px-4 py-2 rounded-lg font-medium transition-all duration-300 hover:bg-arogya-light-blue/50 ${
                   isActive(link.href) 
                     ? 'text-arogya-dark-green bg-arogya-light-blue/30' 
@@ -94,7 +96,7 @@ const Header = () => {
               >
                 {link.icon}
                 <span>{link.label}</span>
-              </a>
+              </button>
             ))}
           </nav>
 
@@ -103,7 +105,7 @@ const Header = () => {
             {userType ? (
               <div className="flex items-center space-x-3">
                 <SubscriptionUpgrade variant="badge" context="dashboard" />
-                <span className="text-sm text-arogya-teal font-medium">
+                <span className="text-sm text-arogya-dark-teal font-medium">
                   Welcome, {userType === 'patient' ? 'John' : userType === 'doctor' ? 'Dr. Smith' : 'Admin'}
                 </span>
                 <DropdownMenu>
@@ -175,19 +177,21 @@ const Header = () => {
           <div className="md:hidden py-4 border-t border-arogya-light-blue/30 bg-white/95 backdrop-blur-md">
             <nav className="flex flex-col space-y-2">
               {navLinks.map((link) => (
-                <a
+                <button
                   key={link.href}
-                  href={link.href}
-                  className={`flex items-center space-x-3 px-4 py-3 rounded-lg font-medium transition-all duration-300 ${
+                  onClick={() => {
+                    navigate(link.href);
+                    setIsMobileMenuOpen(false);
+                  }}
+                  className={`flex items-center space-x-3 px-4 py-3 rounded-lg font-medium transition-all duration-300 text-left ${
                     isActive(link.href) 
                       ? 'text-arogya-dark-green bg-arogya-light-blue/30' 
                       : 'text-arogya-teal hover:text-arogya-dark-green hover:bg-arogya-light-blue/50'
                   }`}
-                  onClick={() => setIsMobileMenuOpen(false)}
                 >
                   {link.icon}
                   <span>{link.label}</span>
-                </a>
+                </button>
               ))}
               
               <div className="pt-4 border-t border-arogya-light-blue/30 mt-4">

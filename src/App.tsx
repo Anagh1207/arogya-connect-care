@@ -15,6 +15,10 @@ import MyHealthRecords from "./pages/MyHealthRecords";
 import Team from "./pages/Team";
 import NotFound from "./pages/NotFound";
 import Subscription from "./pages/Subscription";
+import Services from "./pages/Services";
+import Contact from "./pages/Contact";
+import Privacy from "./pages/Privacy";
+import Terms from "./pages/Terms";
 import Chatbot from "./components/Chatbot";
 import Header from "./components/Header";
 import Footer from "./components/Footer";
@@ -29,6 +33,10 @@ const App = () => (
       <BrowserRouter>
         <Routes>
           <Route path="/" element={<Index />} />
+          <Route path="/services" element={<Services />} />
+          <Route path="/contact" element={<Contact />} />
+          <Route path="/privacy" element={<Privacy />} />
+          <Route path="/terms" element={<Terms />} />
           <Route path="/login" element={
             <div className="min-h-screen">
               <Header />

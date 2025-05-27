@@ -116,7 +116,7 @@ const PatientDashboard = () => {
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-gray-600">Total Consultations</p>
-                  <p className="text-2xl font-bold text-gray-900">12</p>
+                  <p className="text-2xl font-bold text-arogya-dark-teal">12</p>
                   <p className="text-arogya-dark-green text-sm">+2 this month</p>
                 </div>
                 <svg className="w-8 h-8 text-arogya-dark-green" fill="currentColor" viewBox="0 0 20 20">
@@ -131,7 +131,7 @@ const PatientDashboard = () => {
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-gray-600">Medical Records</p>
-                  <p className="text-2xl font-bold text-gray-900">8</p>
+                  <p className="text-2xl font-bold text-arogya-dark-teal">8</p>
                   <p className="text-arogya-dark-green text-sm">Recently updated</p>
                 </div>
                 <svg className="w-8 h-8 text-arogya-dark-green" fill="currentColor" viewBox="0 0 20 20">
@@ -186,7 +186,7 @@ const PatientDashboard = () => {
                           </svg>
                         </div>
                         <div>
-                          <h3 className="font-semibold text-gray-900">{appointment.doctor}</h3>
+                          <h3 className="font-semibold text-arogya-dark-teal">{appointment.doctor}</h3>
                           <p className="text-gray-600">{appointment.specialty}</p>
                           <p className="text-sm text-gray-500">{appointment.date} at {appointment.time}</p>
                         </div>
