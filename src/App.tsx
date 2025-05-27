@@ -15,6 +15,7 @@ import MyHealthRecords from "./pages/MyHealthRecords";
 import Team from "./pages/Team";
 import NotFound from "./pages/NotFound";
 import Subscription from "./pages/Subscription";
+import PaymentDashboard from "./pages/PaymentDashboard";
 import Services from "./pages/Services";
 import Contact from "./pages/Contact";
 import Privacy from "./pages/Privacy";
@@ -44,6 +45,7 @@ const App = () => (
           <Route path="/my-health-records" element={<MyHealthRecords />} />
           <Route path="/team" element={<Team />} />
           <Route path="/subscription" element={<Subscription />} />
+          <Route path="/payment-dashboard" element={<PaymentDashboard />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
         <Chatbot />

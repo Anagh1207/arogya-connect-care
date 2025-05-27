@@ -102,8 +102,16 @@ const Subscription = () => {
 
   const handleSelectPlan = (planId: string) => {
     setSelectedPlan(planId);
-    // In a real app, this would redirect to payment processing
-    console.log(`Selected plan: ${planId} with ${billingCycle} billing`);
+    // Store selected plan in localStorage for Payment Dashboard
+    const selectedPlanData = plans.find(plan => plan.id === planId);
+    if (selectedPlanData) {
+      localStorage.setItem('selectedPlan', JSON.stringify({
+        ...selectedPlanData,
+        billing: billingCycle
+      }));
+    }
+    // Redirect to payment dashboard
+    navigate('/payment-dashboard');
   };
 
   return (

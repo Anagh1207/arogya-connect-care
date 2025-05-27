@@ -20,94 +20,93 @@ const Team = () => {
   const teamMembers: TeamMember[] = [
     {
       id: 1,
-      name: 'Dr. Rajesh Kumar',
-      role: 'Founder & CEO',
-      bio: 'Experienced physician with 15+ years in healthcare technology and digital health solutions.',
-      image: '/api/placeholder/150/150',
-      linkedin: 'https://linkedin.com/in/rajeshkumar',
-      email: 'rajesh@arogyacare.com',
-      specialty: 'Internal Medicine',
-      experience: '15+ years'
-    },
-    {
-      id: 2,
-      name: 'Priya Sharma',
-      role: 'Chief Technology Officer',
-      bio: 'Former senior engineer at top tech companies, passionate about healthcare innovation.',
-      image: '/api/placeholder/150/150',
-      linkedin: 'https://linkedin.com/in/priyasharma',
-      email: 'priya@arogyacare.com',
-      github: 'https://github.com/priyasharma',
-      specialty: 'Healthcare Tech',
-      experience: '12+ years'
-    },
-    {
-      id: 3,
-      name: 'Dr. Amit Patel',
-      role: 'Chief Medical Officer',
-      bio: 'Board-certified physician specializing in emergency medicine and telemedicine.',
-      image: '/api/placeholder/150/150',
-      linkedin: 'https://linkedin.com/in/amitpatel',
-      email: 'amit@arogyacare.com',
-      specialty: 'Emergency Medicine',
-      experience: '18+ years'
-    },
-    {
-      id: 4,
-      name: 'Sarah Wilson',
-      role: 'Head of Product',
-      bio: 'Product management expert focused on creating user-friendly healthcare experiences.',
-      image: '/api/placeholder/150/150',
-      linkedin: 'https://linkedin.com/in/sarahwilson',
-      email: 'sarah@arogyacare.com',
-      specialty: 'Product Strategy',
+      name: 'Anagh Vasishtha',
+      role: 'Chief Executive Officer',
+      bio: 'Visionary leader with 10+ years in healthcare technology and business strategy. Leading Arogya Care towards revolutionizing digital healthcare in India.',
+      image: '/lovable-uploads/13def091-5e9a-4c64-bbb5-df9904f9ff09.png',
+      linkedin: 'https://linkedin.com/in/anaghvasishtha',
+      email: 'anagh@arogyacare.com',
+      specialty: 'Strategic Leadership',
       experience: '10+ years'
     },
     {
-      id: 5,
-      name: 'Ravi Menon',
-      role: 'Head of Engineering',
-      bio: 'Full-stack developer with expertise in scalable healthcare platforms and AI integration.',
+      id: 2,
+      name: 'Rakshit Awadhiya',
+      role: 'Chief Technology Officer',
+      bio: 'Tech innovator specializing in healthcare platforms and AI integration. Building scalable solutions that connect patients with quality healthcare.',
+      image: '/lovable-uploads/096fc626-5902-4aa0-92ac-55b8575f8e27.png',
+      linkedin: 'https://linkedin.com/in/rakshitawadhiya',
+      email: 'rakshit@arogyacare.com',
+      github: 'https://github.com/rakshitawadhiya',
+      specialty: 'Healthcare Technology',
+      experience: '8+ years'
+    },
+    {
+      id: 3,
+      name: 'Priya Sharma',
+      role: 'Product Manager',
+      bio: 'Product strategy expert focused on creating user-centric healthcare experiences that make medical care accessible to everyone.',
       image: '/api/placeholder/150/150',
-      linkedin: 'https://linkedin.com/in/ravimenon',
-      email: 'ravi@arogyacare.com',
-      github: 'https://github.com/ravimenon',
-      specialty: 'Software Engineering',
-      experience: '14+ years'
+      linkedin: 'https://linkedin.com/in/priyasharma',
+      email: 'priya@arogyacare.com',
+      specialty: 'Product Strategy',
+      experience: '7+ years'
+    },
+    {
+      id: 4,
+      name: 'Kunal Mehta',
+      role: 'Lead Developer',
+      bio: 'Full-stack development specialist with expertise in React, Node.js, and cloud technologies. Building robust healthcare platforms.',
+      image: '/api/placeholder/150/150',
+      linkedin: 'https://linkedin.com/in/kunalmehta',
+      email: 'kunal@arogyacare.com',
+      github: 'https://github.com/kunalmehta',
+      specialty: 'Software Development',
+      experience: '6+ years'
+    },
+    {
+      id: 5,
+      name: 'Aarav Jain',
+      role: 'UX Designer',
+      bio: 'Creative designer passionate about crafting intuitive interfaces that make healthcare technology accessible and user-friendly.',
+      image: '/api/placeholder/150/150',
+      linkedin: 'https://linkedin.com/in/aaravjain',
+      email: 'aarav@arogyacare.com',
+      specialty: 'UX/UI Design',
+      experience: '5+ years'
     },
     {
       id: 6,
-      name: 'Dr. Meera Singh',
-      role: 'Head of Clinical Operations',
-      bio: 'Healthcare operations specialist ensuring quality care delivery and compliance.',
+      name: 'Nandini Verma',
+      role: 'Data Analyst',
+      bio: 'Healthcare data specialist using analytics and machine learning to derive insights that improve patient outcomes and operational efficiency.',
       image: '/api/placeholder/150/150',
-      linkedin: 'https://linkedin.com/in/meerasingh',
-      email: 'meera@arogyacare.com',
-      specialty: 'Clinical Operations',
-      experience: '16+ years'
+      linkedin: 'https://linkedin.com/in/nandiniversma',
+      email: 'nandini@arogyacare.com',
+      specialty: 'Data Analytics',
+      experience: '4+ years'
     },
     {
       id: 7,
-      name: 'Alex Thompson',
-      role: 'Head of Design',
-      bio: 'UX/UI designer creating intuitive interfaces for healthcare accessibility.',
+      name: 'Dr. Arjun Patel',
+      role: 'Chief Medical Officer',
+      bio: 'Board-certified physician with expertise in telemedicine and digital health protocols. Ensuring clinical excellence in our platform.',
       image: '/api/placeholder/150/150',
-      linkedin: 'https://linkedin.com/in/alexthompson',
-      email: 'alex@arogyacare.com',
-      specialty: 'UX/UI Design',
-      experience: '8+ years'
+      linkedin: 'https://linkedin.com/in/drarjunpatel',
+      email: 'arjun@arogyacare.com',
+      specialty: 'Digital Medicine',
+      experience: '12+ years'
     },
     {
       id: 8,
       name: 'Kavya Reddy',
-      role: 'Data Scientist',
-      bio: 'AI/ML expert developing predictive models for better health outcomes.',
+      role: 'Quality Assurance Lead',
+      bio: 'Healthcare quality specialist ensuring our platform meets the highest standards of reliability, security, and user experience.',
       image: '/api/placeholder/150/150',
       linkedin: 'https://linkedin.com/in/kavyareddy',
       email: 'kavya@arogyacare.com',
-      github: 'https://github.com/kavyareddy',
-      specialty: 'AI/Machine Learning',
-      experience: '9+ years'
+      specialty: 'Quality Assurance',
+      experience: '6+ years'
     }
   ];
 
@@ -128,7 +127,7 @@ const Team = () => {
           </h1>
           <p className="text-xl text-arogya-teal max-w-3xl mx-auto leading-relaxed">
             Our diverse team of healthcare professionals, technologists, and innovators 
-            working together to make quality healthcare accessible to everyone.
+            working together to make quality healthcare accessible to everyone in India.
           </p>
         </div>
 
@@ -146,7 +145,7 @@ const Team = () => {
             <div className="w-16 h-16 bg-arogya-dark-green rounded-full flex items-center justify-center mx-auto mb-4">
               <Award className="w-8 h-8 text-white" />
             </div>
-            <h3 className="text-3xl font-bold text-arogya-dark-teal">200+</h3>
+            <h3 className="text-3xl font-bold text-arogya-dark-teal">150+</h3>
             <p className="text-arogya-teal">Years Combined Experience</p>
           </Card>
           
@@ -170,13 +169,11 @@ const Team = () => {
         {/* Team Grid */}
         <div className="grid md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
           {teamMembers.map((member) => (
-            <Card key={member.id} className="group hover:shadow-2xl transition-all duration-500 transform hover:-translate-y-2 border-0 bg-white/80 backdrop-blur-sm overflow-hidden">
+            <Card key={member.id} className="group hover:shadow-2xl transition-all duration-500 transform hover:-translate-y-2 border-0 bg-white/90 backdrop-blur-sm overflow-hidden">
               <CardContent className="p-0">
                 {/* Profile Image */}
                 <div className="relative overflow-hidden">
-                  <div 
-                    className="w-full h-64 bg-gradient-to-br from-arogya-light-blue to-arogya-beige-yellow flex items-center justify-center relative"
-                  >
+                  <div className="w-full h-64 bg-gradient-to-br from-arogya-light-blue to-arogya-beige-yellow flex items-center justify-center relative">
                     <img
                       src={member.image}
                       alt={member.name}
@@ -262,7 +259,7 @@ const Team = () => {
                   <h2 className="text-3xl md:text-4xl font-bold mb-4">Want to Join Our Mission?</h2>
                   <p className="text-xl mb-8 opacity-90 max-w-2xl mx-auto">
                     We're always looking for passionate individuals who want to make 
-                    a difference in healthcare and improve lives around the world.
+                    a difference in healthcare and improve lives across India.
                   </p>
                   <div className="flex flex-col sm:flex-row gap-4 justify-center">
                     <Button 
