@@ -16,6 +16,8 @@ import Team from "./pages/Team";
 import NotFound from "./pages/NotFound";
 import Subscription from "./pages/Subscription";
 import Chatbot from "./components/Chatbot";
+import Header from "./components/Header";
+import Footer from "./components/Footer";
 
 const queryClient = new QueryClient();
 
@@ -27,16 +29,64 @@ const App = () => (
       <BrowserRouter>
         <Routes>
           <Route path="/" element={<Index />} />
-          <Route path="/login" element={<Login />} />
-          <Route path="/signup" element={<Signup />} />
-          <Route path="/patient-dashboard" element={<PatientDashboard />} />
-          <Route path="/doctor-dashboard" element={<DoctorDashboard />} />
+          <Route path="/login" element={
+            <div className="min-h-screen">
+              <Header />
+              <Login />
+              <Footer />
+            </div>
+          } />
+          <Route path="/signup" element={
+            <div className="min-h-screen">
+              <Header />
+              <Signup />
+              <Footer />
+            </div>
+          } />
+          <Route path="/patient-dashboard" element={
+            <div className="min-h-screen">
+              <Header />
+              <PatientDashboard />
+              <Footer />
+            </div>
+          } />
+          <Route path="/doctor-dashboard" element={
+            <div className="min-h-screen">
+              <Header />
+              <DoctorDashboard />
+              <Footer />
+            </div>
+          } />
           <Route path="/emergency-services" element={<EmergencyServices />} />
-          <Route path="/admin-panel" element={<AdminPanel />} />
+          <Route path="/admin-panel" element={
+            <div className="min-h-screen">
+              <Header />
+              <AdminPanel />
+              <Footer />
+            </div>
+          } />
           <Route path="/my-health-records" element={<MyHealthRecords />} />
-          <Route path="/team" element={<Team />} />
-          <Route path="/subscription" element={<Subscription />} />
-          <Route path="*" element={<NotFound />} />
+          <Route path="/team" element={
+            <div className="min-h-screen">
+              <Header />
+              <Team />
+              <Footer />
+            </div>
+          } />
+          <Route path="/subscription" element={
+            <div className="min-h-screen">
+              <Header />
+              <Subscription />
+              <Footer />
+            </div>
+          } />
+          <Route path="*" element={
+            <div className="min-h-screen">
+              <Header />
+              <NotFound />
+              <Footer />
+            </div>
+          } />
         </Routes>
         <Chatbot />
       </BrowserRouter>
