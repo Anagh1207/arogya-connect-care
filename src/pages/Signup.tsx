@@ -134,7 +134,7 @@ const Signup = () => {
               >
                 Sign in
               </button>
-            </div>
+            </p>
           </div>
         </CardContent>
       </Card>
