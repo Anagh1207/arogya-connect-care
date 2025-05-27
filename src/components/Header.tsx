@@ -9,6 +9,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import SubscriptionUpgrade from './SubscriptionUpgrade';
 
 const Header = () => {
   const [userType, setUserType] = useState<'patient' | 'doctor' | 'admin' | null>(null);
@@ -101,6 +102,7 @@ const Header = () => {
           <div className="hidden md:flex items-center space-x-4">
             {userType ? (
               <div className="flex items-center space-x-3">
+                <SubscriptionUpgrade variant="badge" context="dashboard" />
                 <span className="text-sm text-arogya-teal font-medium">
                   Welcome, {userType === 'patient' ? 'John' : userType === 'doctor' ? 'Dr. Smith' : 'Admin'}
                 </span>
