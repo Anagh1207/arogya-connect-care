@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -28,50 +27,50 @@ import Footer from '@/components/Footer';
 const HospitalDashboard = () => {
   const [selectedTab, setSelectedTab] = useState('overview');
 
-  // Sample data with Indian context
+  // Sample data with English context
   const patientData = [
-    { month: 'जन', patients: 1200 },
-    { month: 'फर', patients: 1400 },
-    { month: 'मार', patients: 1300 },
-    { month: 'अप्र', patients: 1600 },
-    { month: 'मई', patients: 1800 },
-    { month: 'जून', patients: 1750 },
+    { month: 'Jan', patients: 1200 },
+    { month: 'Feb', patients: 1400 },
+    { month: 'Mar', patients: 1300 },
+    { month: 'Apr', patients: 1600 },
+    { month: 'May', patients: 1800 },
+    { month: 'Jun', patients: 1750 },
   ];
 
   const departmentData = [
-    { name: 'कार्डियोलॉजी', value: 30, color: '#22C55E' },
-    { name: 'न्यूरोलॉजी', value: 25, color: '#3B82F6' },
-    { name: 'ऑर्थोपेडिक्स', value: 20, color: '#F59E0B' },
-    { name: 'पीडियाट्रिक्स', value: 15, color: '#EF4444' },
-    { name: 'अन्य', value: 10, color: '#8B5CF6' },
+    { name: 'Cardiology', value: 30, color: '#22C55E' },
+    { name: 'Neurology', value: 25, color: '#3B82F6' },
+    { name: 'Orthopedics', value: 20, color: '#F59E0B' },
+    { name: 'Pediatrics', value: 15, color: '#EF4444' },
+    { name: 'Others', value: 10, color: '#8B5CF6' },
   ];
 
   const patients = [
-    { id: 1, name: 'श्री राहुल शर्मा', age: 45, department: 'कार्डियोलॉजी', doctor: 'डॉ. प्रिया गुप्ता', status: 'admitted', bed: 'ICU-101', contact: '+91-98765-43210' },
-    { id: 2, name: 'श्रीमती सुनीता देवी', age: 62, department: 'न्यूरोलॉजी', doctor: 'डॉ. अमित कुमार', status: 'discharged', bed: 'N/A', contact: '+91-87654-32109' },
-    { id: 3, name: 'श्री विकास पटेल', age: 28, department: 'ऑर्थोपेडिक्स', doctor: 'डॉ. रीता शर्मा', status: 'outpatient', bed: 'N/A', contact: '+91-76543-21098' },
-    { id: 4, name: 'श्रीमती आरती सिंह', age: 35, department: 'गायनेकोलॉजी', doctor: 'डॉ. मीना अग्रवाल', status: 'admitted', bed: 'GEN-205', contact: '+91-65432-10987' },
+    { id: 1, name: 'Mr. Rahul Sharma', age: 45, department: 'Cardiology', doctor: 'Dr. Priya Gupta', status: 'admitted', bed: 'ICU-101', contact: '+91-98765-43210' },
+    { id: 2, name: 'Mrs. Sunita Devi', age: 62, department: 'Neurology', doctor: 'Dr. Amit Kumar', status: 'discharged', bed: 'N/A', contact: '+91-87654-32109' },
+    { id: 3, name: 'Mr. Vikas Patel', age: 28, department: 'Orthopedics', doctor: 'Dr. Rita Sharma', status: 'outpatient', bed: 'N/A', contact: '+91-76543-21098' },
+    { id: 4, name: 'Mrs. Aarti Singh', age: 35, department: 'Gynecology', doctor: 'Dr. Meena Agarwal', status: 'admitted', bed: 'GEN-205', contact: '+91-65432-10987' },
   ];
 
   const doctors = [
-    { id: 1, name: 'डॉ. प्रिया गुप्ता', specialty: 'कार्डियोलॉजी', patients: 45, availability: 'उपलब्ध', schedule: '9:00 AM - 6:00 PM', contact: '+91-98123-45678' },
-    { id: 2, name: 'डॉ. अमित कुमार', specialty: 'न्यूरोलॉजी', patients: 38, availability: 'व्यस्त', schedule: '10:00 AM - 7:00 PM', contact: '+91-87123-45679' },
-    { id: 3, name: 'डॉ. रीता शर्मा', specialty: 'ऑर्थोपेडिक्स', patients: 42, availability: 'उपलब्ध', schedule: '8:00 AM - 5:00 PM', contact: '+91-76123-45680' },
-    { id: 4, name: 'डॉ. मीना अग्रवाल', specialty: 'गायनेकोलॉजी', patients: 35, availability: 'छुट्टी पर', schedule: 'N/A', contact: '+91-65123-45681' },
+    { id: 1, name: 'Dr. Priya Gupta', specialty: 'Cardiology', patients: 45, availability: 'Available', schedule: '9:00 AM - 6:00 PM', contact: '+91-98123-45678' },
+    { id: 2, name: 'Dr. Amit Kumar', specialty: 'Neurology', patients: 38, availability: 'Busy', schedule: '10:00 AM - 7:00 PM', contact: '+91-87123-45679' },
+    { id: 3, name: 'Dr. Rita Sharma', specialty: 'Orthopedics', patients: 42, availability: 'Available', schedule: '8:00 AM - 5:00 PM', contact: '+91-76123-45680' },
+    { id: 4, name: 'Dr. Meena Agarwal', specialty: 'Gynecology', patients: 35, availability: 'On Leave', schedule: 'N/A', contact: '+91-65123-45681' },
   ];
 
   const ambulances = [
-    { id: 1, vehicleNo: 'DL-01-AB-1234', driver: 'श्री राम प्रसाद', status: 'उपलब्ध', location: 'कनॉट प्लेस', contact: '+91-98765-11111', lastService: '2024-01-10' },
-    { id: 2, vehicleNo: 'DL-02-CD-5678', driver: 'श्री शंकर लाल', status: 'इमरजेंसी में', location: 'लाजपत नगर', contact: '+91-98765-22222', lastService: '2024-01-08' },
-    { id: 3, vehicleNo: 'DL-03-EF-9012', driver: 'श्री मुकेश कुमार', status: 'मेंटेनेंस में', location: 'गैरेज', contact: '+91-98765-33333', lastService: '2024-01-05' },
-    { id: 4, vehicleNo: 'DL-04-GH-3456', driver: 'श्री सुरेश चंद', status: 'उपलब्ध', location: 'सरोजिनी नगर', contact: '+91-98765-44444', lastService: '2024-01-12' },
+    { id: 1, vehicleNo: 'DL-01-AB-1234', driver: 'Mr. Ram Prasad', status: 'Available', location: 'Connaught Place', contact: '+91-98765-11111', lastService: '2024-01-10' },
+    { id: 2, vehicleNo: 'DL-02-CD-5678', driver: 'Mr. Shankar Lal', status: 'On Emergency', location: 'Lajpat Nagar', contact: '+91-98765-22222', lastService: '2024-01-08' },
+    { id: 3, vehicleNo: 'DL-03-EF-9012', driver: 'Mr. Mukesh Kumar', status: 'Under Maintenance', location: 'Garage', contact: '+91-98765-33333', lastService: '2024-01-05' },
+    { id: 4, vehicleNo: 'DL-04-GH-3456', driver: 'Mr. Suresh Chand', status: 'Available', location: 'Sarojini Nagar', contact: '+91-98765-44444', lastService: '2024-01-12' },
   ];
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case 'उपलब्ध': return 'bg-green-100 text-green-800';
-      case 'व्यस्त': case 'इमरजेंसी में': return 'bg-red-100 text-red-800';
-      case 'छुट्टी पर': case 'मेंटेनेंस में': return 'bg-yellow-100 text-yellow-800';
+      case 'Available': return 'bg-green-100 text-green-800';
+      case 'Busy': case 'On Emergency': return 'bg-red-100 text-red-800';
+      case 'On Leave': case 'Under Maintenance': return 'bg-yellow-100 text-yellow-800';
       case 'admitted': return 'bg-blue-100 text-blue-800';
       case 'discharged': return 'bg-green-100 text-green-800';
       case 'outpatient': return 'bg-purple-100 text-purple-800';
@@ -90,13 +89,13 @@ const HospitalDashboard = () => {
             <div>
               <h1 className="text-3xl font-bold text-arogya-dark-teal mb-2 flex items-center">
                 <Building2 className="w-8 h-8 mr-3" />
-                अस्पताल प्रबंधन डैशबोर्ड
+                Hospital Management Dashboard
               </h1>
-              <p className="text-gray-600">AIIMS नई दिल्ली - व्यापक स्वास्थ्य देखभाल प्रबंधन</p>
+              <p className="text-gray-600">AIIMS New Delhi - Comprehensive Healthcare Management</p>
             </div>
             <div className="text-right">
-              <p className="text-sm text-gray-500">आज की तारीख</p>
-              <p className="text-lg font-semibold text-arogya-dark-teal">{new Date().toLocaleDateString('hi-IN')}</p>
+              <p className="text-sm text-gray-500">Today's Date</p>
+              <p className="text-lg font-semibold text-arogya-dark-teal">{new Date().toLocaleDateString('en-IN')}</p>
             </div>
           </div>
         </div>
@@ -107,9 +106,9 @@ const HospitalDashboard = () => {
             <CardContent className="p-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-green-100">कुल मरीज़</p>
+                  <p className="text-green-100">Total Patients</p>
                   <p className="text-3xl font-bold text-white">1,247</p>
-                  <p className="text-green-100 text-sm">+8% इस सप्ताह</p>
+                  <p className="text-green-100 text-sm">+8% this week</p>
                 </div>
                 <Users className="w-10 h-10 text-green-200" />
               </div>
@@ -120,9 +119,9 @@ const HospitalDashboard = () => {
             <CardContent className="p-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-blue-100">डॉक्टर</p>
+                  <p className="text-blue-100">Doctors</p>
                   <p className="text-3xl font-bold text-white">89</p>
-                  <p className="text-blue-100 text-sm">12 ऑन ड्यूटी</p>
+                  <p className="text-blue-100 text-sm">12 on duty</p>
                 </div>
                 <Stethoscope className="w-10 h-10 text-blue-200" />
               </div>
@@ -133,9 +132,9 @@ const HospitalDashboard = () => {
             <CardContent className="p-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-orange-100">एम्बुलेंस</p>
+                  <p className="text-orange-100">Ambulances</p>
                   <p className="text-3xl font-bold text-white">12</p>
-                  <p className="text-orange-100 text-sm">8 उपलब्ध</p>
+                  <p className="text-orange-100 text-sm">8 available</p>
                 </div>
                 <Ambulance className="w-10 h-10 text-orange-200" />
               </div>
@@ -146,9 +145,9 @@ const HospitalDashboard = () => {
             <CardContent className="p-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-purple-100">बेड उपलब्धता</p>
+                  <p className="text-purple-100">Bed Availability</p>
                   <p className="text-3xl font-bold text-white">156/200</p>
-                  <p className="text-purple-100 text-sm">78% भरे हुए</p>
+                  <p className="text-purple-100 text-sm">78% occupied</p>
                 </div>
                 <Activity className="w-10 h-10 text-purple-200" />
               </div>
@@ -160,16 +159,16 @@ const HospitalDashboard = () => {
         <Tabs value={selectedTab} onValueChange={setSelectedTab} className="space-y-6">
           <TabsList className="grid w-full grid-cols-4 lg:w-fit bg-white shadow-lg">
             <TabsTrigger value="overview" className="data-[state=active]:bg-arogya-dark-green data-[state=active]:text-white">
-              ओवरव्यू
+              Overview
             </TabsTrigger>
             <TabsTrigger value="patients" className="data-[state=active]:bg-arogya-dark-green data-[state=active]:text-white">
-              मरीज़
+              Patients
             </TabsTrigger>
             <TabsTrigger value="doctors" className="data-[state=active]:bg-arogya-dark-green data-[state=active]:text-white">
-              डॉक्टर
+              Doctors
             </TabsTrigger>
             <TabsTrigger value="ambulances" className="data-[state=active]:bg-arogya-dark-green data-[state=active]:text-white">
-              एम्बुलेंस
+              Ambulances
             </TabsTrigger>
           </TabsList>
 
@@ -180,7 +179,7 @@ const HospitalDashboard = () => {
                 <CardHeader>
                   <CardTitle className="text-arogya-dark-teal flex items-center">
                     <TrendingUp className="w-5 h-5 mr-2" />
-                    मरीज़ों का प्रवाह
+                    Patient Flow
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
@@ -198,7 +197,7 @@ const HospitalDashboard = () => {
 
               <Card className="shadow-lg">
                 <CardHeader>
-                  <CardTitle className="text-arogya-dark-teal">विभागीय वितरण</CardTitle>
+                  <CardTitle className="text-arogya-dark-teal">Department Distribution</CardTitle>
                 </CardHeader>
                 <CardContent>
                   <ResponsiveContainer width="100%" height={300}>
@@ -226,25 +225,25 @@ const HospitalDashboard = () => {
             {/* Quick Actions */}
             <Card className="shadow-lg">
               <CardHeader>
-                <CardTitle className="text-arogya-dark-teal">त्वरित कार्य</CardTitle>
+                <CardTitle className="text-arogya-dark-teal">Quick Actions</CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="grid md:grid-cols-4 gap-4">
                   <Button className="bg-arogya-dark-green hover:bg-arogya-light-green text-white p-6 h-auto flex-col">
                     <UserPlus className="w-8 h-8 mb-2" />
-                    नया मरीज़ जोड़ें
+                    Add New Patient
                   </Button>
                   <Button className="bg-blue-600 hover:bg-blue-700 text-white p-6 h-auto flex-col">
                     <Calendar className="w-8 h-8 mb-2" />
-                    अपॉइंटमेंट बुक करें
+                    Book Appointment
                   </Button>
                   <Button className="bg-orange-600 hover:bg-orange-700 text-white p-6 h-auto flex-col">
                     <Ambulance className="w-8 h-8 mb-2" />
-                    एम्बुलेंस भेजें
+                    Dispatch Ambulance
                   </Button>
                   <Button className="bg-purple-600 hover:bg-purple-700 text-white p-6 h-auto flex-col">
                     <AlertTriangle className="w-8 h-8 mb-2" />
-                    इमरजेंसी अलर्ट
+                    Emergency Alert
                   </Button>
                 </div>
               </CardContent>
@@ -256,22 +255,22 @@ const HospitalDashboard = () => {
             <Card className="shadow-lg">
               <CardHeader>
                 <div className="flex justify-between items-center">
-                  <CardTitle className="text-arogya-dark-teal">मरीज़ प्रबंधन</CardTitle>
+                  <CardTitle className="text-arogya-dark-teal">Patient Management</CardTitle>
                   <div className="flex space-x-4">
-                    <Input placeholder="मरीज़ खोजें..." className="w-64" />
+                    <Input placeholder="Search patients..." className="w-64" />
                     <Select>
                       <SelectTrigger className="w-48">
-                        <SelectValue placeholder="विभाग चुनें" />
+                        <SelectValue placeholder="Select Department" />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="cardiology">कार्डियोलॉजी</SelectItem>
-                        <SelectItem value="neurology">न्यूरोलॉजी</SelectItem>
-                        <SelectItem value="orthopedics">ऑर्थोपेडिक्स</SelectItem>
+                        <SelectItem value="cardiology">Cardiology</SelectItem>
+                        <SelectItem value="neurology">Neurology</SelectItem>
+                        <SelectItem value="orthopedics">Orthopedics</SelectItem>
                       </SelectContent>
                     </Select>
                     <Button className="bg-arogya-dark-green hover:bg-arogya-light-green text-white">
                       <UserPlus className="w-4 h-4 mr-2" />
-                      नया मरीज़
+                      New Patient
                     </Button>
                   </div>
                 </div>
@@ -287,8 +286,8 @@ const HospitalDashboard = () => {
                           </div>
                           <div>
                             <h3 className="font-semibold text-gray-900">{patient.name}</h3>
-                            <p className="text-gray-600">उम्र: {patient.age} • {patient.department}</p>
-                            <p className="text-sm text-gray-500">डॉक्टर: {patient.doctor}</p>
+                            <p className="text-gray-600">Age: {patient.age} • {patient.department}</p>
+                            <p className="text-sm text-gray-500">Doctor: {patient.doctor}</p>
                             <p className="text-sm text-gray-500 flex items-center">
                               <Phone className="w-4 h-4 mr-1" />
                               {patient.contact}
@@ -297,14 +296,14 @@ const HospitalDashboard = () => {
                         </div>
                         <div className="flex items-center space-x-3">
                           <Badge className={getStatusColor(patient.status)}>
-                            {patient.status === 'admitted' ? 'भर्ती' : 
-                             patient.status === 'discharged' ? 'छुट्टी' : 'बाह्य रोगी'}
+                            {patient.status === 'admitted' ? 'Admitted' : 
+                             patient.status === 'discharged' ? 'Discharged' : 'Outpatient'}
                           </Badge>
                           {patient.bed !== 'N/A' && (
-                            <span className="text-sm text-gray-600">बेड: {patient.bed}</span>
+                            <span className="text-sm text-gray-600">Bed: {patient.bed}</span>
                           )}
                           <Button variant="outline" size="sm">
-                            विवरण देखें
+                            View Details
                           </Button>
                         </div>
                       </div>
@@ -320,10 +319,10 @@ const HospitalDashboard = () => {
             <Card className="shadow-lg">
               <CardHeader>
                 <div className="flex justify-between items-center">
-                  <CardTitle className="text-arogya-dark-teal">डॉक्टर प्रबंधन</CardTitle>
+                  <CardTitle className="text-arogya-dark-teal">Doctor Management</CardTitle>
                   <Button className="bg-arogya-dark-green hover:bg-arogya-light-green text-white">
                     <UserPlus className="w-4 h-4 mr-2" />
-                    नया डॉक्टर जोड़ें
+                    Add New Doctor
                   </Button>
                 </div>
               </CardHeader>
@@ -339,7 +338,7 @@ const HospitalDashboard = () => {
                           <div>
                             <h3 className="font-semibold text-gray-900">{doctor.name}</h3>
                             <p className="text-gray-600">{doctor.specialty}</p>
-                            <p className="text-sm text-gray-500">मरीज़: {doctor.patients} • {doctor.schedule}</p>
+                            <p className="text-sm text-gray-500">Patients: {doctor.patients} • {doctor.schedule}</p>
                             <p className="text-sm text-gray-500 flex items-center">
                               <Phone className="w-4 h-4 mr-1" />
                               {doctor.contact}
@@ -351,7 +350,7 @@ const HospitalDashboard = () => {
                             {doctor.availability}
                           </Badge>
                           <Button variant="outline" size="sm">
-                            शेड्यूल देखें
+                            View Schedule
                           </Button>
                         </div>
                       </div>
@@ -367,10 +366,10 @@ const HospitalDashboard = () => {
             <Card className="shadow-lg">
               <CardHeader>
                 <div className="flex justify-between items-center">
-                  <CardTitle className="text-arogya-dark-teal">एम्बुलेंस प्रबंधन</CardTitle>
+                  <CardTitle className="text-arogya-dark-teal">Ambulance Management</CardTitle>
                   <Button className="bg-red-600 hover:bg-red-700 text-white">
                     <AlertTriangle className="w-4 h-4 mr-2" />
-                    इमरजेंसी भेजें
+                    Emergency Dispatch
                   </Button>
                 </div>
               </CardHeader>
@@ -385,7 +384,7 @@ const HospitalDashboard = () => {
                           </div>
                           <div>
                             <h3 className="font-semibold text-gray-900">{ambulance.vehicleNo}</h3>
-                            <p className="text-gray-600">चालक: {ambulance.driver}</p>
+                            <p className="text-gray-600">Driver: {ambulance.driver}</p>
                             <p className="text-sm text-gray-500 flex items-center">
                               <MapPin className="w-4 h-4 mr-1" />
                               {ambulance.location}
@@ -400,9 +399,9 @@ const HospitalDashboard = () => {
                           <Badge className={getStatusColor(ambulance.status)}>
                             {ambulance.status}
                           </Badge>
-                          <span className="text-xs text-gray-500">सर्विस: {ambulance.lastService}</span>
+                          <span className="text-xs text-gray-500">Service: {ambulance.lastService}</span>
                           <Button variant="outline" size="sm">
-                            ट्रैक करें
+                            Track
                           </Button>
                         </div>
                       </div>
