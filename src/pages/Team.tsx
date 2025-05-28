@@ -271,7 +271,7 @@ const Team = () => {
                     <Button 
                       size="lg"
                       variant="outline"
-                      className="border-2 border-white text-white hover:bg-white hover:text-arogya-dark-green font-semibold px-8 py-3 transition-all duration-300 transform hover:scale-105"
+                      className="border-2 border-white text-arogya-beige-yellow hover:bg-white hover:text-arogya-dark-green font-semibold px-8 py-3 transition-all duration-300 transform hover:scale-105"
                     >
                       Learn About Our Culture
                     </Button>
