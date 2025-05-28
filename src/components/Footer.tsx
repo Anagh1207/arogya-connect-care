@@ -57,24 +57,23 @@ const Footer = () => {
           </div>
 
           <div>
+            <h3 className="text-lg font-semibold mb-6 text-arogya-beige-yellow">Company</h3>
+            <ul className="space-y-3">
+              <li><button onClick={() => navigate('/about')} className="text-arogya-light-blue hover:text-white transition-colors text-left">About Us</button></li>
+              <li><button onClick={() => navigate('/team')} className="text-arogya-light-blue hover:text-white transition-colors text-left">Our Team</button></li>
+              <li><button onClick={() => navigate('/services')} className="text-arogya-light-blue hover:text-white transition-colors text-left">Services</button></li>
+              <li><button onClick={() => navigate('/contact')} className="text-arogya-light-blue hover:text-white transition-colors text-left">Contact Us</button></li>
+            </ul>
+          </div>
+
+          <div>
             <h3 className="text-lg font-semibold mb-6 text-arogya-beige-yellow">For Patients</h3>
             <ul className="space-y-3">
               <li><button onClick={() => navigate('/patient-dashboard')} className="text-arogya-light-blue hover:text-white transition-colors text-left">Book Consultation</button></li>
               <li><button onClick={() => navigate('/team')} className="text-arogya-light-blue hover:text-white transition-colors text-left">Find Doctors</button></li>
               <li><button onClick={() => navigate('/my-health-records')} className="text-arogya-light-blue hover:text-white transition-colors text-left">Medical Records</button></li>
               <li><button onClick={() => navigate('/subscription')} className="text-arogya-light-blue hover:text-white transition-colors text-left">Health Insurance</button></li>
-              <li><button onClick={() => navigate('/patient-dashboard')} className="text-arogya-light-blue hover:text-white transition-colors text-left">Prescription Refills</button></li>
-            </ul>
-          </div>
-
-          <div>
-            <h3 className="text-lg font-semibold mb-6 text-arogya-beige-yellow">For Doctors</h3>
-            <ul className="space-y-3">
-              <li><button onClick={() => navigate('/doctor-dashboard')} className="text-arogya-light-blue hover:text-white transition-colors text-left">Join Our Network</button></li>
-              <li><button onClick={() => navigate('/doctor-dashboard')} className="text-arogya-light-blue hover:text-white transition-colors text-left">Practice Management</button></li>
-              <li><button onClick={() => navigate('/services')} className="text-arogya-light-blue hover:text-white transition-colors text-left">Billing Support</button></li>
-              <li><button onClick={() => navigate('/services')} className="text-arogya-light-blue hover:text-white transition-colors text-left">Training Resources</button></li>
-              <li><button onClick={() => navigate('/services')} className="text-arogya-light-blue hover:text-white transition-colors text-left">Telemedicine Tools</button></li>
+              <li><button onClick={() => navigate('/emergency-services')} className="text-arogya-light-blue hover:text-white transition-colors text-left">Emergency Services</button></li>
             </ul>
           </div>
 
@@ -124,8 +123,8 @@ const Footer = () => {
           <div className="flex space-x-6 mt-4 md:mt-0">
             <button onClick={() => navigate('/privacy')} className="text-arogya-light-blue hover:text-white text-sm transition-colors">Privacy</button>
             <button onClick={() => navigate('/terms')} className="text-arogya-light-blue hover:text-white text-sm transition-colors">Terms</button>
-            <button onClick={() => navigate('/accessibility')} className="text-arogya-light-blue hover:text-white text-sm transition-colors">Accessibility</button>
-            <button onClick={() => navigate('/cookies')} className="text-arogya-light-blue hover:text-white text-sm transition-colors">Cookies</button>
+            <button onClick={() => navigate('/about')} className="text-arogya-light-blue hover:text-white text-sm transition-colors">About</button>
+            <button onClick={() => navigate('/contact')} className="text-arogya-light-blue hover:text-white text-sm transition-colors">Contact</button>
           </div>
         </div>
       </div>
