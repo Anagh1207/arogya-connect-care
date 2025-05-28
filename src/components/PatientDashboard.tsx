@@ -1,100 +1,57 @@
+
 import { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { useNavigate } from 'react-router-dom';
+import { Calendar, Clock, User, FileText, Heart, Phone, Video, MessageSquare, Star, MapPin } from 'lucide-react';
+import Header from './Header';
+import Footer from './Footer';
 import SubscriptionUpgrade from './SubscriptionUpgrade';
 
 const PatientDashboard = () => {
-  const navigate = useNavigate();
   const [showUpgrade, setShowUpgrade] = useState(true);
   
   const [appointments] = useState([
-    { id: 1, doctor: 'Dr. Sarah Johnson', specialty: 'Cardiology', date: '2024-01-15', time: '10:00 AM', status: 'upcoming' },
-    { id: 2, doctor: 'Dr. Michael Chen', specialty: 'Dermatology', date: '2024-01-20', time: '2:30 PM', status: 'upcoming' },
-    { id: 3, doctor: 'Dr. Emily Davis', specialty: 'General Practice', date: '2024-01-10', time: '9:00 AM', status: 'completed' }
+    { id: 1, doctor: 'Dr. Priya Sharma', specialty: 'Cardiologist', date: '2024-01-15', time: '10:00 AM', status: 'upcoming', hospital: 'AIIMS Delhi' },
+    { id: 2, doctor: 'Dr. Rajesh Kumar', specialty: 'Neurologist', date: '2024-01-18', time: '2:00 PM', status: 'upcoming', hospital: 'Apollo Chennai' },
+    { id: 3, doctor: 'Dr. Sunita Patel', specialty: 'Dermatologist', date: '2024-01-10', time: '11:00 AM', status: 'completed', hospital: 'Fortis Mumbai' }
   ]);
 
-  const [medicalRecords] = useState([
-    { id: 1, title: 'Blood Test Results', date: '2024-01-08', doctor: 'Dr. Sarah Johnson', type: 'Lab Report' },
-    { id: 2, title: 'X-Ray Chest', date: '2024-01-05', doctor: 'Dr. Michael Chen', type: 'Imaging' },
-    { id: 3, title: 'Prescription', date: '2024-01-03', doctor: 'Dr. Emily Davis', type: 'Prescription' }
+  const [prescriptions] = useState([
+    { id: 1, doctor: 'Dr. Priya Sharma', medication: 'Atorvastatin 10mg', dosage: 'Once daily after dinner', date: '2024-01-10' },
+    { id: 2, doctor: 'Dr. Rajesh Kumar', medication: 'Paracetamol 500mg', dosage: 'Twice daily after meals', date: '2024-01-08' }
   ]);
+
+  const vitals = {
+    bloodPressure: '120/80',
+    heartRate: '72 bpm',
+    weight: '68 kg',
+    height: '5\'7"',
+    bloodSugar: '95 mg/dL',
+    temperature: '98.6°F'
+  };
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-arogya-light-blue/20 via-white to-arogya-beige-yellow/10">
+      <Header />
+      
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="mb-8">
-          <h1 className="text-3xl font-bold text-arogya-dark-teal mb-2">Patient Dashboard</h1>
-          <p className="text-gray-600">Welcome back! Manage your healthcare journey.</p>
+          <h1 className="text-3xl font-bold text-arogya-dark-teal mb-2">नमस्कार, राहुल जी!</h1>
+          <p className="text-gray-600">Welcome to your personal health dashboard</p>
         </div>
 
         {/* Subscription upgrade banner */}
         {showUpgrade && (
           <SubscriptionUpgrade 
             variant="banner" 
-            context="dashboard"
+            context="premium-features"
             onClose={() => setShowUpgrade(false)}
           />
         )}
 
-        {/* Emergency Services Quick Access */}
-        <div className="mb-8">
-          <Card className="bg-red-600 text-white border-0">
-            <CardContent className="p-6">
-              <div className="flex items-center justify-between">
-                <div>
-                  <h3 className="text-xl font-bold mb-2 text-white">Emergency Services</h3>
-                  <p className="text-red-100">Need blood or ambulance? Get immediate help</p>
-                </div>
-                <Button
-                  onClick={() => navigate('/emergency-services')}
-                  className="bg-white text-red-600 hover:bg-red-50 font-semibold px-6 py-3"
-                >
-                  Access Now
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
-        </div>
-
-        {/* Quick Actions */}
-        <div className="mb-8 grid md:grid-cols-2 gap-4">
-          <Card className="bg-arogya-dark-green text-white border-0">
-            <CardContent className="p-6">
-              <div className="flex items-center justify-between">
-                <div>
-                  <h3 className="text-lg font-bold mb-2 text-white">My Health Records</h3>
-                  <p className="text-green-100">View your complete medical history</p>
-                </div>
-                <Button
-                  onClick={() => navigate('/my-health-records')}
-                  className="bg-white text-arogya-dark-green hover:bg-green-50 font-semibold"
-                >
-                  View Records
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card className="bg-arogya-light-green text-white border-0">
-            <CardContent className="p-6">
-              <div className="flex items-center justify-between">
-                <div>
-                  <h3 className="text-lg font-bold mb-2 text-white">Our Team</h3>
-                  <p className="text-green-100">Meet the Arogya Care team</p>
-                </div>
-                <Button
-                  onClick={() => navigate('/team')}
-                  className="bg-white text-arogya-light-green hover:bg-green-50 font-semibold"
-                >
-                  Meet Team
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
-        </div>
-
+        {/* Quick Stats */}
         <div className="grid lg:grid-cols-4 gap-6 mb-8">
           <Card className="bg-arogya-dark-green text-white">
             <CardContent className="p-6">
@@ -102,41 +59,9 @@ const PatientDashboard = () => {
                 <div>
                   <p className="text-green-100">Next Appointment</p>
                   <p className="text-2xl font-bold text-white">Jan 15</p>
-                  <p className="text-green-100">10:00 AM</p>
+                  <p className="text-green-100">Dr. Priya Sharma</p>
                 </div>
-                <svg className="w-8 h-8 text-green-200" fill="currentColor" viewBox="0 0 20 20">
-                  <path fillRule="evenodd" d="M6 2a1 1 0 00-1 1v1H4a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-1V3a1 1 0 10-2 0v1H7V3a1 1 0 00-1-1zm0 5a1 1 0 000 2h8a1 1 0 100-2H6z" clipRule="evenodd" />
-                </svg>
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardContent className="p-6">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-gray-600">Total Consultations</p>
-                  <p className="text-2xl font-bold text-arogya-dark-teal">12</p>
-                  <p className="text-arogya-dark-green text-sm">+2 this month</p>
-                </div>
-                <svg className="w-8 h-8 text-arogya-dark-green" fill="currentColor" viewBox="0 0 20 20">
-                  <path d="M2 6a2 2 0 012-2h6a2 2 0 012 2v6a2 2 0 01-2 2H4a2 2 0 01-2-2V6zM14.553 7.106A1 1 0 0014 8v4a1 1 0 00.553.894l2 1A1 1 0 0018 13V7a1 1 0 00-1.447-.894l-2 1z" />
-                </svg>
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardContent className="p-6">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-gray-600">Medical Records</p>
-                  <p className="text-2xl font-bold text-arogya-dark-teal">8</p>
-                  <p className="text-arogya-dark-green text-sm">Recently updated</p>
-                </div>
-                <svg className="w-8 h-8 text-arogya-dark-green" fill="currentColor" viewBox="0 0 20 20">
-                  <path fillRule="evenodd" d="M4 4a2 2 0 00-2 2v8a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2H4zm0 2v8h12V6H4zm2 3a1 1 0 011-1h6a1 1 0 110 2H7a1 1 0 01-1-1zm0 3a1 1 0 011-1h3a1 1 0 110 2H7a1 1 0 01-1-1z" clipRule="evenodd" />
-                </svg>
+                <Calendar className="w-8 h-8 text-green-200" />
               </div>
             </CardContent>
           </Card>
@@ -146,23 +71,48 @@ const PatientDashboard = () => {
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-gray-600">Health Score</p>
-                  <p className="text-2xl font-bold text-arogya-dark-green">Good</p>
-                  <p className="text-gray-500 text-sm">Based on checkups</p>
+                  <p className="text-2xl font-bold text-arogya-dark-green">85/100</p>
+                  <p className="text-arogya-dark-green text-sm">Very Good</p>
                 </div>
-                <svg className="w-8 h-8 text-arogya-dark-green" fill="currentColor" viewBox="0 0 20 20">
-                  <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
-                </svg>
+                <Heart className="w-8 h-8 text-arogya-dark-green" />
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardContent className="p-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-gray-600">Active Prescriptions</p>
+                  <p className="text-2xl font-bold text-gray-900">4</p>
+                  <p className="text-arogya-dark-green text-sm">2 expiring soon</p>
+                </div>
+                <FileText className="w-8 h-8 text-arogya-dark-green" />
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardContent className="p-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-gray-600">Emergency Contact</p>
+                  <p className="text-lg font-bold text-red-600">102</p>
+                  <p className="text-gray-500 text-sm">24/7 Available</p>
+                </div>
+                <Phone className="w-8 h-8 text-red-500" />
               </div>
             </CardContent>
           </Card>
         </div>
 
         <Tabs defaultValue="appointments" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-4 lg:w-fit">
+          <TabsList className="grid w-full grid-cols-5 lg:w-fit">
             <TabsTrigger value="appointments">Appointments</TabsTrigger>
-            <TabsTrigger value="records">Medical Records</TabsTrigger>
-            <TabsTrigger value="doctors">Find Doctors</TabsTrigger>
-            <TabsTrigger value="upload">Upload Files</TabsTrigger>
+            <TabsTrigger value="records">Health Records</TabsTrigger>
+            <TabsTrigger value="vitals">Vitals</TabsTrigger>
+            <TabsTrigger value="prescriptions">Prescriptions</TabsTrigger>
+            <TabsTrigger value="emergency">Emergency</TabsTrigger>
           </TabsList>
 
           <TabsContent value="appointments">
@@ -181,26 +131,24 @@ const PatientDashboard = () => {
                     <div key={appointment.id} className="flex items-center justify-between p-4 border border-gray-200 rounded-lg hover:bg-gray-50">
                       <div className="flex items-center space-x-4">
                         <div className="w-12 h-12 bg-arogya-light-blue rounded-full flex items-center justify-center">
-                          <svg className="w-6 h-6 text-arogya-dark-green" fill="currentColor" viewBox="0 0 20 20">
-                            <path fillRule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clipRule="evenodd" />
-                          </svg>
+                          <User className="w-6 h-6 text-arogya-dark-green" />
                         </div>
                         <div>
-                          <h3 className="font-semibold text-arogya-dark-teal">{appointment.doctor}</h3>
-                          <p className="text-gray-600">{appointment.specialty}</p>
-                          <p className="text-sm text-gray-500">{appointment.date} at {appointment.time}</p>
+                          <h3 className="font-semibold text-gray-900">{appointment.doctor}</h3>
+                          <p className="text-gray-600">{appointment.specialty} • {appointment.hospital}</p>
+                          <p className="text-sm text-gray-500 flex items-center">
+                            <Calendar className="w-4 h-4 mr-1" />
+                            {appointment.date} at {appointment.time}
+                          </p>
                         </div>
                       </div>
                       <div className="flex items-center space-x-3">
-                        <span className={`px-3 py-1 rounded-full text-xs font-medium ${
-                          appointment.status === 'upcoming' 
-                            ? 'bg-arogya-light-blue text-arogya-dark-green' 
-                            : 'bg-green-100 text-arogya-dark-green'
-                        }`}>
-                          {appointment.status === 'upcoming' ? 'Upcoming' : 'Completed'}
-                        </span>
+                        <Badge variant={appointment.status === 'upcoming' ? 'default' : 'secondary'}>
+                          {appointment.status}
+                        </Badge>
                         {appointment.status === 'upcoming' && (
                           <Button size="sm" className="bg-arogya-dark-green hover:bg-arogya-light-green text-white">
+                            <Video className="w-4 h-4 mr-2" />
                             Join Call
                           </Button>
                         )}
@@ -212,30 +160,102 @@ const PatientDashboard = () => {
             </Card>
           </TabsContent>
 
-          <TabsContent value="records">
+          <TabsContent value="vitals">
             <Card>
               <CardHeader>
-                <CardTitle>Medical Records</CardTitle>
+                <CardTitle>Vital Signs</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="grid md:grid-cols-3 gap-6">
+                  {Object.entries(vitals).map(([key, value]) => (
+                    <div key={key} className="text-center p-4 bg-arogya-light-blue rounded-lg">
+                      <h3 className="text-lg font-semibold text-arogya-dark-teal mb-2 capitalize">
+                        {key.replace(/([A-Z])/g, ' $1').trim()}
+                      </h3>
+                      <p className="text-2xl font-bold text-gray-900">{value}</p>
+                      <p className="text-sm text-gray-600 mt-1">Normal range</p>
+                    </div>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          <TabsContent value="emergency">
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-red-600">Emergency Services</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="grid md:grid-cols-2 gap-6">
+                  <div className="space-y-4">
+                    <h3 className="font-semibold text-gray-900">Emergency Contacts</h3>
+                    <div className="space-y-3">
+                      <div className="flex items-center justify-between p-3 bg-red-50 rounded-lg">
+                        <div>
+                          <p className="font-medium text-red-800">Ambulance</p>
+                          <p className="text-red-600">+91-102</p>
+                        </div>
+                        <Button size="sm" className="bg-red-600 hover:bg-red-700 text-white">
+                          <Phone className="w-4 h-4 mr-2" />
+                          Call Now
+                        </Button>
+                      </div>
+                      <div className="flex items-center justify-between p-3 bg-blue-50 rounded-lg">
+                        <div>
+                          <p className="font-medium text-blue-800">Police</p>
+                          <p className="text-blue-600">+91-100</p>
+                        </div>
+                        <Button size="sm" className="bg-blue-600 hover:bg-blue-700 text-white">
+                          <Phone className="w-4 h-4 mr-2" />
+                          Call Now
+                        </Button>
+                      </div>
+                    </div>
+                  </div>
+                  <div>
+                    <h3 className="font-semibold text-gray-900 mb-4">Nearest Hospitals</h3>
+                    <div className="space-y-3">
+                      <div className="p-3 border rounded-lg">
+                        <p className="font-medium">AIIMS Delhi</p>
+                        <p className="text-sm text-gray-600 flex items-center">
+                          <MapPin className="w-4 h-4 mr-1" />
+                          2.5 km away • Emergency: +91-11-2658-8500
+                        </p>
+                      </div>
+                      <div className="p-3 border rounded-lg">
+                        <p className="font-medium">Safdarjung Hospital</p>
+                        <p className="text-sm text-gray-600 flex items-center">
+                          <MapPin className="w-4 h-4 mr-1" />
+                          3.2 km away • Emergency: +91-11-2673-0000
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          <TabsContent value="prescriptions">
+            <Card>
+              <CardHeader>
+                <CardTitle>Current Prescriptions</CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="space-y-4">
-                  {medicalRecords.map((record) => (
-                    <div key={record.id} className="flex items-center justify-between p-4 border border-gray-200 rounded-lg hover:bg-gray-50">
-                      <div className="flex items-center space-x-4">
-                        <div className="w-10 h-10 bg-arogya-light-blue rounded-lg flex items-center justify-center">
-                          <svg className="w-5 h-5 text-arogya-dark-green" fill="currentColor" viewBox="0 0 20 20">
-                            <path fillRule="evenodd" d="M4 4a2 2 0 00-2 2v8a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2H4zm0 2v8h12V6H4zm2 3a1 1 0 011-1h6a1 1 0 110 2H7a1 1 0 01-1-1zm0 3a1 1 0 011-1h3a1 1 0 110 2H7a1 1 0 01-1-1z" clipRule="evenodd" />
-                          </svg>
-                        </div>
+                  {prescriptions.map((prescription) => (
+                    <div key={prescription.id} className="p-4 border border-gray-200 rounded-lg">
+                      <div className="flex justify-between items-start">
                         <div>
-                          <h3 className="font-semibold text-gray-900">{record.title}</h3>
-                          <p className="text-gray-600">by {record.doctor}</p>
-                          <p className="text-sm text-gray-500">{record.date} • {record.type}</p>
+                          <h3 className="font-semibold text-gray-900">{prescription.medication}</h3>
+                          <p className="text-gray-600">{prescription.dosage}</p>
+                          <p className="text-sm text-gray-500">Prescribed by {prescription.doctor} on {prescription.date}</p>
                         </div>
+                        <Button variant="outline" size="sm">
+                          Reorder
+                        </Button>
                       </div>
-                      <Button variant="outline" size="sm">
-                        View
-                      </Button>
                     </div>
                   ))}
                 </div>
@@ -243,80 +263,27 @@ const PatientDashboard = () => {
             </Card>
           </TabsContent>
 
-          <TabsContent value="doctors">
+          <TabsContent value="records">
             <Card>
               <CardHeader>
-                <CardTitle>Find Doctors</CardTitle>
+                <CardTitle>Health Records</CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-                  {[
-                    { name: 'Dr. Sarah Johnson', specialty: 'Cardiology', rating: 4.9, experience: '15 years', available: true },
-                    { name: 'Dr. Michael Chen', specialty: 'Dermatology', rating: 4.8, experience: '12 years', available: true },
-                    { name: 'Dr. Emily Davis', specialty: 'General Practice', rating: 4.7, experience: '8 years', available: false }
-                  ].map((doctor, index) => (
-                    <div key={index} className="border border-gray-200 rounded-lg p-6 hover:shadow-lg transition-shadow">
-                      <div className="text-center mb-4">
-                        <div className="w-16 h-16 bg-arogya-light-blue rounded-full mx-auto mb-3 flex items-center justify-center">
-                          <svg className="w-8 h-8 text-arogya-dark-green" fill="currentColor" viewBox="0 0 20 20">
-                            <path fillRule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clipRule="evenodd" />
-                          </svg>
-                        </div>
-                        <h3 className="font-semibold text-gray-900">{doctor.name}</h3>
-                        <p className="text-arogya-dark-green">{doctor.specialty}</p>
-                        <p className="text-sm text-gray-500">{doctor.experience} experience</p>
-                      </div>
-                      <div className="flex items-center justify-between mb-4">
-                        <div className="flex items-center">
-                          <span className="text-yellow-500">★</span>
-                          <span className="ml-1 text-sm font-medium">{doctor.rating}</span>
-                        </div>
-                        <span className={`px-2 py-1 rounded-full text-xs ${
-                          doctor.available 
-                            ? 'bg-green-100 text-arogya-dark-green' 
-                            : 'bg-red-100 text-red-600'
-                        }`}>
-                          {doctor.available ? 'Available' : 'Busy'}
-                        </span>
-                      </div>
-                      <Button 
-                        className="w-full bg-arogya-dark-green hover:bg-arogya-light-green" 
-                        disabled={!doctor.available}
-                      >
-                        Book Appointment
-                      </Button>
-                    </div>
-                  ))}
-                </div>
-              </CardContent>
-            </Card>
-          </TabsContent>
-
-          <TabsContent value="upload">
-            <Card>
-              <CardHeader>
-                <CardTitle>Upload Medical Files</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="border-2 border-dashed border-gray-300 rounded-lg p-12 text-center hover:border-healthcare-blue transition-colors">
-                  <svg className="w-12 h-12 mx-auto mb-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 48 48">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M28 8H12a4 4 0 00-4 4v20m32-12v8m0 0v8a4 4 0 01-4 4H12a4 4 0 01-4-4v-4m32-4l-3.172-3.172a4 4 0 00-5.656 0L28 28M8 32l9.172-9.172a4 4 0 015.656 0L28 28m0 0l4 4m4-24h8m-4-4v8m-12 4h.02" />
-                  </svg>
-                  <h3 className="text-lg font-medium text-gray-900 mb-2">Upload your medical files</h3>
-                  <p className="text-gray-600 mb-4">Drag and drop files here, or click to select files</p>
-                  <Button className="bg-healthcare-blue hover:bg-healthcare-blue-dark">
-                    Choose Files
+                <div className="text-center py-12">
+                  <FileText className="w-16 h-16 text-gray-400 mx-auto mb-4" />
+                  <h3 className="text-lg font-medium text-gray-900 mb-2">Your Health Records</h3>
+                  <p className="text-gray-600 mb-6">Upload and manage your medical documents securely</p>
+                  <Button className="bg-arogya-dark-green hover:bg-arogya-light-green text-white">
+                    Upload Records
                   </Button>
-                  <p className="text-xs text-gray-500 mt-4">Supported formats: PDF, JPG, PNG, DOCX (Max 10MB)</p>
                 </div>
               </CardContent>
             </Card>
           </TabsContent>
         </Tabs>
-
-        {/* Floating subscription upgrade */}
-        <SubscriptionUpgrade variant="floating" context="ai-features" />
       </div>
+      
+      <Footer />
     </div>
   );
 };

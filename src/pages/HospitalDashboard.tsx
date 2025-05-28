@@ -2,444 +2,420 @@
 import { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import {
-  Users,
-  UserPlus,
-  Stethoscope,
-  Ambulance,
-  Calendar,
-  Activity,
-  Bell,
-  Search,
-  Filter,
-  MoreVertical,
+import { Badge } from '@/components/ui/badge';
+import { Input } from '@/components/ui/input';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { 
+  Users, 
+  UserPlus, 
+  Stethoscope, 
+  Ambulance, 
+  Activity, 
+  Calendar, 
+  MapPin, 
   Phone,
-  MapPin,
   Clock,
-  Heart,
-  TrendingUp,
   AlertTriangle,
-  CheckCircle
+  CheckCircle,
+  TrendingUp,
+  Building2
 } from 'lucide-react';
-import { ChartContainer, ChartTooltip, ChartTooltipContent } from '@/components/ui/chart';
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, ResponsiveContainer, BarChart, Bar, PieChart, Pie, Cell } from 'recharts';
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, LineChart, Line, PieChart, Pie, Cell } from 'recharts';
+import Header from '@/components/Header';
+import Footer from '@/components/Footer';
 
 const HospitalDashboard = () => {
-  const [activeTab, setActiveTab] = useState('overview');
+  const [selectedTab, setSelectedTab] = useState('overview');
 
-  // Mock data
-  const patients = [
-    { id: 1, name: 'John Doe', age: 34, condition: 'Hypertension', doctor: 'Dr. Smith', status: 'Active', lastVisit: '2024-01-15' },
-    { id: 2, name: 'Jane Smith', age: 28, condition: 'Diabetes', doctor: 'Dr. Johnson', status: 'Recovered', lastVisit: '2024-01-14' },
-    { id: 3, name: 'Mike Wilson', age: 45, condition: 'Heart Disease', doctor: 'Dr. Brown', status: 'Critical', lastVisit: '2024-01-16' },
-  ];
-
-  const doctors = [
-    { id: 1, name: 'Dr. Sarah Smith', specialty: 'Cardiology', experience: '15 years', status: 'Available', patients: 23 },
-    { id: 2, name: 'Dr. John Johnson', specialty: 'Neurology', experience: '12 years', status: 'Busy', patients: 18 },
-    { id: 3, name: 'Dr. Emily Brown', specialty: 'Pediatrics', experience: '8 years', status: 'Available', patients: 31 },
-  ];
-
-  const ambulances = [
-    { id: 'AMB001', location: 'Downtown', status: 'Available', driver: 'Mark Davis', lastService: '2 hrs ago' },
-    { id: 'AMB002', location: 'Suburbs', status: 'On Route', driver: 'Lisa Chen', lastService: '30 mins ago' },
-    { id: 'AMB003', location: 'Hospital', status: 'Maintenance', driver: 'Tom Wilson', lastService: '1 day ago' },
-  ];
-
-  const chartData = [
-    { name: 'Mon', patients: 65, appointments: 45 },
-    { name: 'Tue', patients: 78, appointments: 52 },
-    { name: 'Wed', patients: 82, appointments: 61 },
-    { name: 'Thu', patients: 91, appointments: 68 },
-    { name: 'Fri', patients: 87, appointments: 72 },
-    { name: 'Sat', patients: 45, appointments: 28 },
-    { name: 'Sun', patients: 32, appointments: 18 },
+  // Sample data with Indian context
+  const patientData = [
+    { month: 'जन', patients: 1200 },
+    { month: 'फर', patients: 1400 },
+    { month: 'मार', patients: 1300 },
+    { month: 'अप्र', patients: 1600 },
+    { month: 'मई', patients: 1800 },
+    { month: 'जून', patients: 1750 },
   ];
 
   const departmentData = [
-    { name: 'Cardiology', value: 30, color: '#0088FE' },
-    { name: 'Neurology', value: 25, color: '#00C49F' },
-    { name: 'Pediatrics', value: 20, color: '#FFBB28' },
-    { name: 'Orthopedics', value: 15, color: '#FF8042' },
-    { name: 'Others', value: 10, color: '#8884D8' },
+    { name: 'कार्डियोलॉजी', value: 30, color: '#22C55E' },
+    { name: 'न्यूरोलॉजी', value: 25, color: '#3B82F6' },
+    { name: 'ऑर्थोपेडिक्स', value: 20, color: '#F59E0B' },
+    { name: 'पीडियाट्रिक्स', value: 15, color: '#EF4444' },
+    { name: 'अन्य', value: 10, color: '#8B5CF6' },
+  ];
+
+  const patients = [
+    { id: 1, name: 'श्री राहुल शर्मा', age: 45, department: 'कार्डियोलॉजी', doctor: 'डॉ. प्रिया गुप्ता', status: 'admitted', bed: 'ICU-101', contact: '+91-98765-43210' },
+    { id: 2, name: 'श्रीमती सुनीता देवी', age: 62, department: 'न्यूरोलॉजी', doctor: 'डॉ. अमित कुमार', status: 'discharged', bed: 'N/A', contact: '+91-87654-32109' },
+    { id: 3, name: 'श्री विकास पटेल', age: 28, department: 'ऑर्थोपेडिक्स', doctor: 'डॉ. रीता शर्मा', status: 'outpatient', bed: 'N/A', contact: '+91-76543-21098' },
+    { id: 4, name: 'श्रीमती आरती सिंह', age: 35, department: 'गायनेकोलॉजी', doctor: 'डॉ. मीना अग्रवाल', status: 'admitted', bed: 'GEN-205', contact: '+91-65432-10987' },
+  ];
+
+  const doctors = [
+    { id: 1, name: 'डॉ. प्रिया गुप्ता', specialty: 'कार्डियोलॉजी', patients: 45, availability: 'उपलब्ध', schedule: '9:00 AM - 6:00 PM', contact: '+91-98123-45678' },
+    { id: 2, name: 'डॉ. अमित कुमार', specialty: 'न्यूरोलॉजी', patients: 38, availability: 'व्यस्त', schedule: '10:00 AM - 7:00 PM', contact: '+91-87123-45679' },
+    { id: 3, name: 'डॉ. रीता शर्मा', specialty: 'ऑर्थोपेडिक्स', patients: 42, availability: 'उपलब्ध', schedule: '8:00 AM - 5:00 PM', contact: '+91-76123-45680' },
+    { id: 4, name: 'डॉ. मीना अग्रवाल', specialty: 'गायनेकोलॉजी', patients: 35, availability: 'छुट्टी पर', schedule: 'N/A', contact: '+91-65123-45681' },
+  ];
+
+  const ambulances = [
+    { id: 1, vehicleNo: 'DL-01-AB-1234', driver: 'श्री राम प्रसाद', status: 'उपलब्ध', location: 'कनॉट प्लेस', contact: '+91-98765-11111', lastService: '2024-01-10' },
+    { id: 2, vehicleNo: 'DL-02-CD-5678', driver: 'श्री शंकर लाल', status: 'इमरजेंसी में', location: 'लाजपत नगर', contact: '+91-98765-22222', lastService: '2024-01-08' },
+    { id: 3, vehicleNo: 'DL-03-EF-9012', driver: 'श्री मुकेश कुमार', status: 'मेंटेनेंस में', location: 'गैरेज', contact: '+91-98765-33333', lastService: '2024-01-05' },
+    { id: 4, vehicleNo: 'DL-04-GH-3456', driver: 'श्री सुरेश चंद', status: 'उपलब्ध', location: 'सरोजिनी नगर', contact: '+91-98765-44444', lastService: '2024-01-12' },
   ];
 
   const getStatusColor = (status: string) => {
-    switch (status.toLowerCase()) {
-      case 'active': case 'available': return 'bg-green-100 text-green-800';
-      case 'critical': case 'emergency': return 'bg-red-100 text-red-800';
-      case 'busy': case 'on route': return 'bg-yellow-100 text-yellow-800';
-      case 'recovered': return 'bg-blue-100 text-blue-800';
-      case 'maintenance': return 'bg-gray-100 text-gray-800';
+    switch (status) {
+      case 'उपलब्ध': return 'bg-green-100 text-green-800';
+      case 'व्यस्त': case 'इमरजेंसी में': return 'bg-red-100 text-red-800';
+      case 'छुट्टी पर': case 'मेंटेनेंस में': return 'bg-yellow-100 text-yellow-800';
+      case 'admitted': return 'bg-blue-100 text-blue-800';
+      case 'discharged': return 'bg-green-100 text-green-800';
+      case 'outpatient': return 'bg-purple-100 text-purple-800';
       default: return 'bg-gray-100 text-gray-800';
     }
   };
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      {/* Header */}
-      <div className="bg-white shadow-sm border-b">
-        <div className="px-6 py-4">
+    <div className="min-h-screen bg-gradient-to-br from-arogya-light-blue/20 via-white to-arogya-beige-yellow/10">
+      <Header />
+      
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        {/* Header */}
+        <div className="mb-8">
           <div className="flex items-center justify-between">
             <div>
-              <h1 className="text-2xl font-bold text-gray-900">Hospital Management Dashboard</h1>
-              <p className="text-gray-600">Welcome back, Admin</p>
+              <h1 className="text-3xl font-bold text-arogya-dark-teal mb-2 flex items-center">
+                <Building2 className="w-8 h-8 mr-3" />
+                अस्पताल प्रबंधन डैशबोर्ड
+              </h1>
+              <p className="text-gray-600">AIIMS नई दिल्ली - व्यापक स्वास्थ्य देखभाल प्रबंधन</p>
             </div>
-            <div className="flex items-center space-x-4">
-              <Button variant="outline" size="sm">
-                <Bell className="w-4 h-4 mr-2" />
-                Notifications
-              </Button>
-              <Button className="bg-blue-600 hover:bg-blue-700">
-                <UserPlus className="w-4 h-4 mr-2" />
-                Add Patient
-              </Button>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <div className="flex">
-        {/* Sidebar */}
-        <div className="w-64 bg-white shadow-sm h-screen sticky top-0">
-          <div className="p-6">
-            <div className="space-y-2">
-              <Button
-                variant={activeTab === 'overview' ? 'default' : 'ghost'}
-                className="w-full justify-start"
-                onClick={() => setActiveTab('overview')}
-              >
-                <Activity className="w-4 h-4 mr-2" />
-                Overview
-              </Button>
-              <Button
-                variant={activeTab === 'patients' ? 'default' : 'ghost'}
-                className="w-full justify-start"
-                onClick={() => setActiveTab('patients')}
-              >
-                <Users className="w-4 h-4 mr-2" />
-                Patients
-              </Button>
-              <Button
-                variant={activeTab === 'doctors' ? 'default' : 'ghost'}
-                className="w-full justify-start"
-                onClick={() => setActiveTab('doctors')}
-              >
-                <Stethoscope className="w-4 h-4 mr-2" />
-                Doctors
-              </Button>
-              <Button
-                variant={activeTab === 'ambulances' ? 'default' : 'ghost'}
-                className="w-full justify-start"
-                onClick={() => setActiveTab('ambulances')}
-              >
-                <Ambulance className="w-4 h-4 mr-2" />
-                Ambulances
-              </Button>
-              <Button
-                variant={activeTab === 'appointments' ? 'default' : 'ghost'}
-                className="w-full justify-start"
-                onClick={() => setActiveTab('appointments')}
-              >
-                <Calendar className="w-4 h-4 mr-2" />
-                Appointments
-              </Button>
+            <div className="text-right">
+              <p className="text-sm text-gray-500">आज की तारीख</p>
+              <p className="text-lg font-semibold text-arogya-dark-teal">{new Date().toLocaleDateString('hi-IN')}</p>
             </div>
           </div>
         </div>
 
-        {/* Main Content */}
-        <div className="flex-1 p-6">
-          {activeTab === 'overview' && (
-            <div className="space-y-6">
-              {/* Stats Cards */}
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                <Card className="hover:shadow-lg transition-shadow">
-                  <CardContent className="p-6">
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <p className="text-sm font-medium text-gray-600">Total Patients</p>
-                        <p className="text-3xl font-bold text-blue-600">1,234</p>
-                        <p className="text-sm text-green-600 flex items-center mt-1">
-                          <TrendingUp className="w-4 h-4 mr-1" />
-                          +12% from last month
-                        </p>
-                      </div>
-                      <div className="p-3 bg-blue-100 rounded-full">
-                        <Users className="w-6 h-6 text-blue-600" />
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-
-                <Card className="hover:shadow-lg transition-shadow">
-                  <CardContent className="p-6">
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <p className="text-sm font-medium text-gray-600">Active Doctors</p>
-                        <p className="text-3xl font-bold text-green-600">89</p>
-                        <p className="text-sm text-green-600 flex items-center mt-1">
-                          <CheckCircle className="w-4 h-4 mr-1" />
-                          All available
-                        </p>
-                      </div>
-                      <div className="p-3 bg-green-100 rounded-full">
-                        <Stethoscope className="w-6 h-6 text-green-600" />
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-
-                <Card className="hover:shadow-lg transition-shadow">
-                  <CardContent className="p-6">
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <p className="text-sm font-medium text-gray-600">Emergency Cases</p>
-                        <p className="text-3xl font-bold text-red-600">23</p>
-                        <p className="text-sm text-red-600 flex items-center mt-1">
-                          <AlertTriangle className="w-4 h-4 mr-1" />
-                          Needs attention
-                        </p>
-                      </div>
-                      <div className="p-3 bg-red-100 rounded-full">
-                        <Heart className="w-6 h-6 text-red-600" />
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-
-                <Card className="hover:shadow-lg transition-shadow">
-                  <CardContent className="p-6">
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <p className="text-sm font-medium text-gray-600">Available Ambulances</p>
-                        <p className="text-3xl font-bold text-purple-600">12</p>
-                        <p className="text-sm text-purple-600 flex items-center mt-1">
-                          <Clock className="w-4 h-4 mr-1" />
-                          Ready for dispatch
-                        </p>
-                      </div>
-                      <div className="p-3 bg-purple-100 rounded-full">
-                        <Ambulance className="w-6 h-6 text-purple-600" />
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-              </div>
-
-              {/* Charts */}
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                <Card>
-                  <CardHeader>
-                    <CardTitle>Patient Flow & Appointments</CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <ChartContainer config={{}} className="h-[300px]">
-                      <ResponsiveContainer width="100%" height="100%">
-                        <LineChart data={chartData}>
-                          <CartesianGrid strokeDasharray="3 3" />
-                          <XAxis dataKey="name" />
-                          <YAxis />
-                          <ChartTooltip content={<ChartTooltipContent />} />
-                          <Line type="monotone" dataKey="patients" stroke="#3B82F6" strokeWidth="3" />
-                          <Line type="monotone" dataKey="appointments" stroke="#10B981" strokeWidth="3" />
-                        </LineChart>
-                      </ResponsiveContainer>
-                    </ChartContainer>
-                  </CardContent>
-                </Card>
-
-                <Card>
-                  <CardHeader>
-                    <CardTitle>Department Distribution</CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <ChartContainer config={{}} className="h-[300px]">
-                      <ResponsiveContainer width="100%" height="100%">
-                        <PieChart>
-                          <Pie
-                            data={departmentData}
-                            cx="50%"
-                            cy="50%"
-                            outerRadius={80}
-                            dataKey="value"
-                            label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
-                          >
-                            {departmentData.map((entry, index) => (
-                              <Cell key={`cell-${index}`} fill={entry.color} />
-                            ))}
-                          </Pie>
-                          <ChartTooltip />
-                        </PieChart>
-                      </ResponsiveContainer>
-                    </ChartContainer>
-                  </CardContent>
-                </Card>
-              </div>
-            </div>
-          )}
-
-          {activeTab === 'patients' && (
-            <div className="space-y-6">
+        {/* Stats Cards */}
+        <div className="grid lg:grid-cols-4 gap-6 mb-8">
+          <Card className="bg-gradient-to-r from-arogya-dark-green to-arogya-light-green text-white">
+            <CardContent className="p-6">
               <div className="flex items-center justify-between">
-                <h2 className="text-2xl font-bold text-gray-900">Patient Management</h2>
-                <div className="flex items-center space-x-4">
-                  <div className="relative">
-                    <Search className="w-4 h-4 absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
-                    <Input placeholder="Search patients..." className="pl-10 w-64" />
-                  </div>
-                  <Button variant="outline">
-                    <Filter className="w-4 h-4 mr-2" />
-                    Filter
-                  </Button>
+                <div>
+                  <p className="text-green-100">कुल मरीज़</p>
+                  <p className="text-3xl font-bold text-white">1,247</p>
+                  <p className="text-green-100 text-sm">+8% इस सप्ताह</p>
                 </div>
+                <Users className="w-10 h-10 text-green-200" />
               </div>
+            </CardContent>
+          </Card>
 
-              <Card>
-                <CardContent className="p-0">
-                  <div className="overflow-x-auto">
-                    <table className="w-full">
-                      <thead className="bg-gray-50">
-                        <tr>
-                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Patient</th>
-                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Age</th>
-                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Condition</th>
-                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Doctor</th>
-                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
-                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Last Visit</th>
-                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
-                        </tr>
-                      </thead>
-                      <tbody className="bg-white divide-y divide-gray-200">
-                        {patients.map((patient) => (
-                          <tr key={patient.id} className="hover:bg-gray-50">
-                            <td className="px-6 py-4 whitespace-nowrap">
-                              <div className="flex items-center">
-                                <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center">
-                                  <span className="text-blue-600 font-medium">{patient.name.charAt(0)}</span>
-                                </div>
-                                <div className="ml-4">
-                                  <div className="text-sm font-medium text-gray-900">{patient.name}</div>
-                                </div>
-                              </div>
-                            </td>
-                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{patient.age}</td>
-                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{patient.condition}</td>
-                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{patient.doctor}</td>
-                            <td className="px-6 py-4 whitespace-nowrap">
-                              <Badge className={getStatusColor(patient.status)}>{patient.status}</Badge>
-                            </td>
-                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{patient.lastVisit}</td>
-                            <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                              <Button variant="ghost" size="sm">
-                                <MoreVertical className="w-4 h-4" />
-                              </Button>
-                            </td>
-                          </tr>
+          <Card className="bg-gradient-to-r from-blue-500 to-blue-600 text-white">
+            <CardContent className="p-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-blue-100">डॉक्टर</p>
+                  <p className="text-3xl font-bold text-white">89</p>
+                  <p className="text-blue-100 text-sm">12 ऑन ड्यूटी</p>
+                </div>
+                <Stethoscope className="w-10 h-10 text-blue-200" />
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card className="bg-gradient-to-r from-orange-500 to-red-500 text-white">
+            <CardContent className="p-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-orange-100">एम्बुलेंस</p>
+                  <p className="text-3xl font-bold text-white">12</p>
+                  <p className="text-orange-100 text-sm">8 उपलब्ध</p>
+                </div>
+                <Ambulance className="w-10 h-10 text-orange-200" />
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card className="bg-gradient-to-r from-purple-500 to-purple-600 text-white">
+            <CardContent className="p-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-purple-100">बेड उपलब्धता</p>
+                  <p className="text-3xl font-bold text-white">156/200</p>
+                  <p className="text-purple-100 text-sm">78% भरे हुए</p>
+                </div>
+                <Activity className="w-10 h-10 text-purple-200" />
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* Main Content Tabs */}
+        <Tabs value={selectedTab} onValueChange={setSelectedTab} className="space-y-6">
+          <TabsList className="grid w-full grid-cols-4 lg:w-fit bg-white shadow-lg">
+            <TabsTrigger value="overview" className="data-[state=active]:bg-arogya-dark-green data-[state=active]:text-white">
+              ओवरव्यू
+            </TabsTrigger>
+            <TabsTrigger value="patients" className="data-[state=active]:bg-arogya-dark-green data-[state=active]:text-white">
+              मरीज़
+            </TabsTrigger>
+            <TabsTrigger value="doctors" className="data-[state=active]:bg-arogya-dark-green data-[state=active]:text-white">
+              डॉक्टर
+            </TabsTrigger>
+            <TabsTrigger value="ambulances" className="data-[state=active]:bg-arogya-dark-green data-[state=active]:text-white">
+              एम्बुलेंस
+            </TabsTrigger>
+          </TabsList>
+
+          {/* Overview Tab */}
+          <TabsContent value="overview" className="space-y-6">
+            <div className="grid lg:grid-cols-2 gap-6">
+              <Card className="shadow-lg">
+                <CardHeader>
+                  <CardTitle className="text-arogya-dark-teal flex items-center">
+                    <TrendingUp className="w-5 h-5 mr-2" />
+                    मरीज़ों का प्रवाह
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <ResponsiveContainer width="100%" height={300}>
+                    <BarChart data={patientData}>
+                      <CartesianGrid strokeDasharray="3 3" />
+                      <XAxis dataKey="month" />
+                      <YAxis />
+                      <Tooltip />
+                      <Bar dataKey="patients" fill="#22C55E" radius={[4, 4, 0, 0]} />
+                    </BarChart>
+                  </ResponsiveContainer>
+                </CardContent>
+              </Card>
+
+              <Card className="shadow-lg">
+                <CardHeader>
+                  <CardTitle className="text-arogya-dark-teal">विभागीय वितरण</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <ResponsiveContainer width="100%" height={300}>
+                    <PieChart>
+                      <Pie
+                        data={departmentData}
+                        cx="50%"
+                        cy="50%"
+                        outerRadius={100}
+                        fill="#8884d8"
+                        dataKey="value"
+                        label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
+                      >
+                        {departmentData.map((entry, index) => (
+                          <Cell key={`cell-${index}`} fill={entry.color} />
                         ))}
-                      </tbody>
-                    </table>
-                  </div>
+                      </Pie>
+                      <Tooltip />
+                    </PieChart>
+                  </ResponsiveContainer>
                 </CardContent>
               </Card>
             </div>
-          )}
 
-          {activeTab === 'doctors' && (
-            <div className="space-y-6">
-              <div className="flex items-center justify-between">
-                <h2 className="text-2xl font-bold text-gray-900">Doctor Management</h2>
-                <Button className="bg-blue-600 hover:bg-blue-700">
-                  <UserPlus className="w-4 h-4 mr-2" />
-                  Add Doctor
-                </Button>
-              </div>
+            {/* Quick Actions */}
+            <Card className="shadow-lg">
+              <CardHeader>
+                <CardTitle className="text-arogya-dark-teal">त्वरित कार्य</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="grid md:grid-cols-4 gap-4">
+                  <Button className="bg-arogya-dark-green hover:bg-arogya-light-green text-white p-6 h-auto flex-col">
+                    <UserPlus className="w-8 h-8 mb-2" />
+                    नया मरीज़ जोड़ें
+                  </Button>
+                  <Button className="bg-blue-600 hover:bg-blue-700 text-white p-6 h-auto flex-col">
+                    <Calendar className="w-8 h-8 mb-2" />
+                    अपॉइंटमेंट बुक करें
+                  </Button>
+                  <Button className="bg-orange-600 hover:bg-orange-700 text-white p-6 h-auto flex-col">
+                    <Ambulance className="w-8 h-8 mb-2" />
+                    एम्बुलेंस भेजें
+                  </Button>
+                  <Button className="bg-purple-600 hover:bg-purple-700 text-white p-6 h-auto flex-col">
+                    <AlertTriangle className="w-8 h-8 mb-2" />
+                    इमरजेंसी अलर्ट
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {doctors.map((doctor) => (
-                  <Card key={doctor.id} className="hover:shadow-lg transition-shadow">
-                    <CardContent className="p-6">
-                      <div className="flex items-center justify-between mb-4">
-                        <div className="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center">
-                          <Stethoscope className="w-6 h-6 text-green-600" />
-                        </div>
-                        <Badge className={getStatusColor(doctor.status)}>{doctor.status}</Badge>
-                      </div>
-                      <h3 className="text-lg font-semibold text-gray-900 mb-1">{doctor.name}</h3>
-                      <p className="text-gray-600 mb-2">{doctor.specialty}</p>
-                      <p className="text-sm text-gray-500 mb-4">{doctor.experience} experience</p>
+          {/* Patients Tab */}
+          <TabsContent value="patients" className="space-y-6">
+            <Card className="shadow-lg">
+              <CardHeader>
+                <div className="flex justify-between items-center">
+                  <CardTitle className="text-arogya-dark-teal">मरीज़ प्रबंधन</CardTitle>
+                  <div className="flex space-x-4">
+                    <Input placeholder="मरीज़ खोजें..." className="w-64" />
+                    <Select>
+                      <SelectTrigger className="w-48">
+                        <SelectValue placeholder="विभाग चुनें" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="cardiology">कार्डियोलॉजी</SelectItem>
+                        <SelectItem value="neurology">न्यूरोलॉजी</SelectItem>
+                        <SelectItem value="orthopedics">ऑर्थोपेडिक्स</SelectItem>
+                      </SelectContent>
+                    </Select>
+                    <Button className="bg-arogya-dark-green hover:bg-arogya-light-green text-white">
+                      <UserPlus className="w-4 h-4 mr-2" />
+                      नया मरीज़
+                    </Button>
+                  </div>
+                </div>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-4">
+                  {patients.map((patient) => (
+                    <div key={patient.id} className="p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors">
                       <div className="flex items-center justify-between">
-                        <span className="text-sm text-gray-600">{doctor.patients} patients</span>
-                        <div className="flex space-x-2">
+                        <div className="flex items-center space-x-4">
+                          <div className="w-12 h-12 bg-arogya-light-blue rounded-full flex items-center justify-center">
+                            <Users className="w-6 h-6 text-arogya-dark-green" />
+                          </div>
+                          <div>
+                            <h3 className="font-semibold text-gray-900">{patient.name}</h3>
+                            <p className="text-gray-600">उम्र: {patient.age} • {patient.department}</p>
+                            <p className="text-sm text-gray-500">डॉक्टर: {patient.doctor}</p>
+                            <p className="text-sm text-gray-500 flex items-center">
+                              <Phone className="w-4 h-4 mr-1" />
+                              {patient.contact}
+                            </p>
+                          </div>
+                        </div>
+                        <div className="flex items-center space-x-3">
+                          <Badge className={getStatusColor(patient.status)}>
+                            {patient.status === 'admitted' ? 'भर्ती' : 
+                             patient.status === 'discharged' ? 'छुट्टी' : 'बाह्य रोगी'}
+                          </Badge>
+                          {patient.bed !== 'N/A' && (
+                            <span className="text-sm text-gray-600">बेड: {patient.bed}</span>
+                          )}
                           <Button variant="outline" size="sm">
-                            <Phone className="w-4 h-4" />
+                            विवरण देखें
                           </Button>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          {/* Doctors Tab */}
+          <TabsContent value="doctors" className="space-y-6">
+            <Card className="shadow-lg">
+              <CardHeader>
+                <div className="flex justify-between items-center">
+                  <CardTitle className="text-arogya-dark-teal">डॉक्टर प्रबंधन</CardTitle>
+                  <Button className="bg-arogya-dark-green hover:bg-arogya-light-green text-white">
+                    <UserPlus className="w-4 h-4 mr-2" />
+                    नया डॉक्टर जोड़ें
+                  </Button>
+                </div>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-4">
+                  {doctors.map((doctor) => (
+                    <div key={doctor.id} className="p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors">
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center space-x-4">
+                          <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center">
+                            <Stethoscope className="w-6 h-6 text-blue-600" />
+                          </div>
+                          <div>
+                            <h3 className="font-semibold text-gray-900">{doctor.name}</h3>
+                            <p className="text-gray-600">{doctor.specialty}</p>
+                            <p className="text-sm text-gray-500">मरीज़: {doctor.patients} • {doctor.schedule}</p>
+                            <p className="text-sm text-gray-500 flex items-center">
+                              <Phone className="w-4 h-4 mr-1" />
+                              {doctor.contact}
+                            </p>
+                          </div>
+                        </div>
+                        <div className="flex items-center space-x-3">
+                          <Badge className={getStatusColor(doctor.availability)}>
+                            {doctor.availability}
+                          </Badge>
                           <Button variant="outline" size="sm">
-                            <Calendar className="w-4 h-4" />
+                            शेड्यूल देखें
                           </Button>
                         </div>
                       </div>
-                    </CardContent>
-                  </Card>
-                ))}
-              </div>
-            </div>
-          )}
+                    </div>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
 
-          {activeTab === 'ambulances' && (
-            <div className="space-y-6">
-              <div className="flex items-center justify-between">
-                <h2 className="text-2xl font-bold text-gray-900">Ambulance Fleet</h2>
-                <Button className="bg-red-600 hover:bg-red-700">
-                  <AlertTriangle className="w-4 h-4 mr-2" />
-                  Emergency Dispatch
-                </Button>
-              </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {ambulances.map((ambulance) => (
-                  <Card key={ambulance.id} className="hover:shadow-lg transition-shadow">
-                    <CardContent className="p-6">
-                      <div className="flex items-center justify-between mb-4">
-                        <div className="w-12 h-12 bg-red-100 rounded-full flex items-center justify-center">
-                          <Ambulance className="w-6 h-6 text-red-600" />
+          {/* Ambulances Tab */}
+          <TabsContent value="ambulances" className="space-y-6">
+            <Card className="shadow-lg">
+              <CardHeader>
+                <div className="flex justify-between items-center">
+                  <CardTitle className="text-arogya-dark-teal">एम्बुलेंस प्रबंधन</CardTitle>
+                  <Button className="bg-red-600 hover:bg-red-700 text-white">
+                    <AlertTriangle className="w-4 h-4 mr-2" />
+                    इमरजेंसी भेजें
+                  </Button>
+                </div>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-4">
+                  {ambulances.map((ambulance) => (
+                    <div key={ambulance.id} className="p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors">
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center space-x-4">
+                          <div className="w-12 h-12 bg-orange-100 rounded-full flex items-center justify-center">
+                            <Ambulance className="w-6 h-6 text-orange-600" />
+                          </div>
+                          <div>
+                            <h3 className="font-semibold text-gray-900">{ambulance.vehicleNo}</h3>
+                            <p className="text-gray-600">चालक: {ambulance.driver}</p>
+                            <p className="text-sm text-gray-500 flex items-center">
+                              <MapPin className="w-4 h-4 mr-1" />
+                              {ambulance.location}
+                            </p>
+                            <p className="text-sm text-gray-500 flex items-center">
+                              <Phone className="w-4 h-4 mr-1" />
+                              {ambulance.contact}
+                            </p>
+                          </div>
                         </div>
-                        <Badge className={getStatusColor(ambulance.status)}>{ambulance.status}</Badge>
+                        <div className="flex items-center space-x-3">
+                          <Badge className={getStatusColor(ambulance.status)}>
+                            {ambulance.status}
+                          </Badge>
+                          <span className="text-xs text-gray-500">सर्विस: {ambulance.lastService}</span>
+                          <Button variant="outline" size="sm">
+                            ट्रैक करें
+                          </Button>
+                        </div>
                       </div>
-                      <h3 className="text-lg font-semibold text-gray-900 mb-2">{ambulance.id}</h3>
-                      <div className="space-y-2 text-sm text-gray-600">
-                        <div className="flex items-center">
-                          <MapPin className="w-4 h-4 mr-2" />
-                          {ambulance.location}
-                        </div>
-                        <div className="flex items-center">
-                          <Users className="w-4 h-4 mr-2" />
-                          {ambulance.driver}
-                        </div>
-                        <div className="flex items-center">
-                          <Clock className="w-4 h-4 mr-2" />
-                          Last service: {ambulance.lastService}
-                        </div>
-                      </div>
-                      <div className="mt-4 flex space-x-2">
-                        <Button variant="outline" size="sm" className="flex-1">
-                          Track
-                        </Button>
-                        <Button variant="outline" size="sm" className="flex-1">
-                          Dispatch
-                        </Button>
-                      </div>
-                    </CardContent>
-                  </Card>
-                ))}
-              </div>
-            </div>
-          )}
-        </div>
+                    </div>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+        </Tabs>
       </div>
+      
+      <Footer />
     </div>
   );
 };
