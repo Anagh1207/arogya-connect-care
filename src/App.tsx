@@ -21,6 +21,7 @@ import Services from "./pages/Services";
 import Contact from "./pages/Contact";
 import Privacy from "./pages/Privacy";
 import Terms from "./pages/Terms";
+import HospitalDashboard from "./pages/HospitalDashboard";
 import Chatbot from "./components/Chatbot";
 
 const queryClient = new QueryClient();
@@ -42,6 +43,7 @@ const App = () => (
           <Route path="/signup" element={<Signup />} />
           <Route path="/patient-dashboard" element={<PatientDashboard />} />
           <Route path="/doctor-dashboard" element={<DoctorDashboard />} />
+          <Route path="/hospital-dashboard" element={<HospitalDashboard />} />
           <Route path="/emergency-services" element={<EmergencyServices />} />
           <Route path="/admin-panel" element={<AdminPanel />} />
           <Route path="/my-health-records" element={<MyHealthRecords />} />
