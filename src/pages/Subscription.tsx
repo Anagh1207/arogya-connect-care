@@ -1,15 +1,17 @@
-
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { useNavigate } from 'react-router-dom';
-import { Check, Star, Crown, Shield, Video, FileText, Clock, Users, Zap, Heart, ArrowRight, X } from 'lucide-react';
+import { useToast } from '@/hooks/use-toast';
+import { Check, Star, Crown, Shield, Video, FileText, Clock, Users, Zap, Heart, ArrowRight, X, CreditCard, Smartphone } from 'lucide-react';
 
 const Subscription = () => {
   const navigate = useNavigate();
+  const { toast } = useToast();
   const [billingCycle, setBillingCycle] = useState<'monthly' | 'yearly'>('monthly');
   const [selectedPlan, setSelectedPlan] = useState<string | null>(null);
+  const [paymentGateway, setPaymentGateway] = useState<'stripe' | 'razorpay' | 'phonepe'>('razorpay');
 
   const plans = [
     {
@@ -102,16 +104,38 @@ const Subscription = () => {
 
   const handleSelectPlan = (planId: string) => {
     setSelectedPlan(planId);
-    // Store selected plan in localStorage for Payment Dashboard
     const selectedPlanData = plans.find(plan => plan.id === planId);
     if (selectedPlanData) {
-      localStorage.setItem('selectedPlan', JSON.stringify({
+      // Store selected plan data
+      const planData = {
         ...selectedPlanData,
-        billing: billingCycle
-      }));
+        billing: billingCycle,
+        gateway: paymentGateway
+      };
+      localStorage.setItem('selectedPlan', JSON.stringify(planData));
+      
+      // Simulate payment gateway integration
+      toast({
+        title: "Redirecting to Payment Gateway",
+        description: `Opening ${paymentGateway.charAt(0).toUpperCase() + paymentGateway.slice(1)} payment gateway...`,
+      });
+
+      // Simulate gateway redirect with delay
+      setTimeout(() => {
+        // In a real implementation, this would redirect to the actual payment gateway
+        // For demo purposes, we'll redirect to the payment dashboard
+        navigate('/payment-dashboard');
+      }, 2000);
     }
-    // Redirect to payment dashboard
-    navigate('/payment-dashboard');
+  };
+
+  const getGatewayIcon = (gateway: string) => {
+    switch(gateway) {
+      case 'stripe': return <CreditCard className="w-4 h-4" />;
+      case 'razorpay': return <Zap className="w-4 h-4" />;
+      case 'phonepe': return <Smartphone className="w-4 h-4" />;
+      default: return <CreditCard className="w-4 h-4" />;
+    }
   };
 
   return (
@@ -133,31 +157,71 @@ const Subscription = () => {
             From individuals to large organizations, we have the perfect healthcare solution for your needs.
           </p>
 
-          {/* Billing Toggle */}
-          <div className="inline-flex bg-white rounded-xl p-1 shadow-lg border border-arogya-light-blue/30">
-            <button
-              onClick={() => setBillingCycle('monthly')}
-              className={`px-6 py-3 rounded-lg font-medium transition-all duration-200 ${
-                billingCycle === 'monthly'
-                  ? 'bg-arogya-dark-green text-white shadow-md'
-                  : 'text-arogya-teal hover:text-arogya-dark-green'
-              }`}
-            >
-              Monthly
-            </button>
-            <button
-              onClick={() => setBillingCycle('yearly')}
-              className={`px-6 py-3 rounded-lg font-medium transition-all duration-200 relative ${
-                billingCycle === 'yearly'
-                  ? 'bg-arogya-dark-green text-white shadow-md'
-                  : 'text-arogya-teal hover:text-arogya-dark-green'
-              }`}
-            >
-              Yearly
-              <Badge className="absolute -top-2 -right-2 bg-green-500 text-white text-xs px-2 py-0.5">
-                Save 17%
-              </Badge>
-            </button>
+          {/* Billing and Gateway Selection */}
+          <div className="flex flex-col sm:flex-row gap-4 justify-center items-center mb-8">
+            {/* Billing Toggle */}
+            <div className="inline-flex bg-white rounded-xl p-1 shadow-lg border border-arogya-light-blue/30">
+              <button
+                onClick={() => setBillingCycle('monthly')}
+                className={`px-6 py-3 rounded-lg font-medium transition-all duration-200 ${
+                  billingCycle === 'monthly'
+                    ? 'bg-arogya-dark-green text-white shadow-md'
+                    : 'text-arogya-teal hover:text-arogya-dark-green'
+                }`}
+              >
+                Monthly
+              </button>
+              <button
+                onClick={() => setBillingCycle('yearly')}
+                className={`px-6 py-3 rounded-lg font-medium transition-all duration-200 relative ${
+                  billingCycle === 'yearly'
+                    ? 'bg-arogya-dark-green text-white shadow-md'
+                    : 'text-arogya-teal hover:text-arogya-dark-green'
+                }`}
+              >
+                Yearly
+                <Badge className="absolute -top-2 -right-2 bg-green-500 text-white text-xs px-2 py-0.5">
+                  Save 17%
+                </Badge>
+              </button>
+            </div>
+
+            {/* Payment Gateway Selection */}
+            <div className="inline-flex bg-white rounded-xl p-1 shadow-lg border border-arogya-light-blue/30">
+              <button
+                onClick={() => setPaymentGateway('razorpay')}
+                className={`px-4 py-3 rounded-lg font-medium transition-all duration-200 flex items-center space-x-2 ${
+                  paymentGateway === 'razorpay'
+                    ? 'bg-blue-600 text-white shadow-md'
+                    : 'text-blue-600 hover:text-blue-800'
+                }`}
+              >
+                {getGatewayIcon('razorpay')}
+                <span>Razorpay</span>
+              </button>
+              <button
+                onClick={() => setPaymentGateway('stripe')}
+                className={`px-4 py-3 rounded-lg font-medium transition-all duration-200 flex items-center space-x-2 ${
+                  paymentGateway === 'stripe'
+                    ? 'bg-purple-600 text-white shadow-md'
+                    : 'text-purple-600 hover:text-purple-800'
+                }`}
+              >
+                {getGatewayIcon('stripe')}
+                <span>Stripe</span>
+              </button>
+              <button
+                onClick={() => setPaymentGateway('phonepe')}
+                className={`px-4 py-3 rounded-lg font-medium transition-all duration-200 flex items-center space-x-2 ${
+                  paymentGateway === 'phonepe'
+                    ? 'bg-green-600 text-white shadow-md'
+                    : 'text-green-600 hover:text-green-800'
+                }`}
+              >
+                {getGatewayIcon('phonepe')}
+                <span>PhonePe</span>
+              </button>
+            </div>
           </div>
         </div>
 
@@ -238,8 +302,11 @@ const Subscription = () => {
                       : 'bg-white border-2 border-arogya-dark-green text-arogya-dark-green hover:bg-arogya-dark-green hover:text-white'
                   }`}
                 >
-                  {selectedPlan === plan.id ? 'Selected' : 'Choose Plan'}
-                  <ArrowRight className="w-4 h-4 ml-2" />
+                  <div className="flex items-center justify-center space-x-2">
+                    {getGatewayIcon(paymentGateway)}
+                    <span>Pay with {paymentGateway.charAt(0).toUpperCase() + paymentGateway.slice(1)}</span>
+                    <ArrowRight className="w-4 h-4" />
+                  </div>
                 </Button>
               </CardContent>
             </Card>
