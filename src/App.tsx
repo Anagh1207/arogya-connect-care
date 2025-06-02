@@ -17,6 +17,7 @@ import AdminPanel from "./pages/AdminPanel";
 import MyHealthRecords from "./pages/MyHealthRecords";
 import Team from "./pages/Team";
 import NotFound from "./pages/NotFound";
+import Unauthorized from "./pages/Unauthorized";
 import Subscription from "./pages/Subscription";
 import PaymentDashboard from "./pages/PaymentDashboard";
 import Services from "./pages/Services";
@@ -44,6 +45,7 @@ const App = () => (
             <Route path="/terms" element={<Terms />} />
             <Route path="/login" element={<Login />} />
             <Route path="/signup" element={<Signup />} />
+            <Route path="/unauthorized" element={<Unauthorized />} />
             <Route 
               path="/patient-dashboard" 
               element={

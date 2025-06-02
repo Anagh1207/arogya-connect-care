@@ -1,4 +1,3 @@
-
 import { useState, useEffect, createContext, useContext, ReactNode } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { User, Session } from '@supabase/supabase-js';
@@ -70,6 +69,25 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     }
   };
 
+  const redirectToDashboard = (role: string) => {
+    switch(role) {
+      case 'patient':
+        window.location.href = '/patient-dashboard';
+        break;
+      case 'doctor':
+        window.location.href = '/doctor-dashboard';
+        break;
+      case 'hospital':
+        window.location.href = '/hospital-dashboard';
+        break;
+      case 'admin':
+        window.location.href = '/admin-panel';
+        break;
+      default:
+        window.location.href = '/';
+    }
+  };
+
   useEffect(() => {
     const getSession = async () => {
       try {
@@ -112,6 +130,17 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     return () => subscription.unsubscribe();
   }, []);
 
+  useEffect(() => {
+    if (profile && !loading) {
+      const currentPath = window.location.pathname;
+      const isOnLoginPage = currentPath === '/login' || currentPath === '/signup';
+      
+      if (isOnLoginPage) {
+        redirectToDashboard(profile.role);
+      }
+    }
+  }, [profile, loading]);
+
   const signIn = async (email: string, password: string) => {
     try {
       setLoading(true);
@@ -135,8 +164,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
           title: "Success",
           description: "Signed in successfully!",
         });
-        // Force page reload for clean state
-        window.location.href = '/';
+        // Note: redirection will happen automatically via useEffect when profile loads
       }
     } catch (error: any) {
       toast({
