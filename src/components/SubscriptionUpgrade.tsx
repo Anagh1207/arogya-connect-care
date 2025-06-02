@@ -48,7 +48,8 @@ const SubscriptionUpgrade = ({
     }
   };
 
-  const message = contextMessages[context];
+  // Get the message for the current context, fallback to dashboard if context is invalid
+  const message = contextMessages[context] || contextMessages.dashboard;
 
   if (!isVisible) return null;
 

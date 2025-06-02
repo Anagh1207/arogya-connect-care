@@ -46,7 +46,7 @@ const PatientDashboard = () => {
         {showUpgrade && (
           <SubscriptionUpgrade 
             variant="banner" 
-            context="premium-features"
+            context="dashboard"
             onClose={() => setShowUpgrade(false)}
           />
         )}
