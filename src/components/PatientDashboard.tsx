@@ -7,65 +7,53 @@ import { Calendar, Clock, User, FileText, Heart, Phone, Video, MessageSquare, St
 import Header from './Header';
 import Footer from './Footer';
 import SubscriptionUpgrade from './SubscriptionUpgrade';
+import { useAuth } from '@/hooks/useAuth';
+import { usePatientData } from '@/hooks/usePatientData';
+import { format } from 'date-fns';
+
 const PatientDashboard = () => {
+  const { profile } = useAuth();
+  const { appointments, prescriptions, vitals, loading } = usePatientData();
   const [showUpgrade, setShowUpgrade] = useState(true);
-  const [appointments] = useState([{
-    id: 1,
-    doctor: 'Dr. Priya Sharma',
-    specialty: 'Cardiologist',
-    date: '2024-01-15',
-    time: '10:00 AM',
-    status: 'upcoming',
-    hospital: 'AIIMS Delhi'
-  }, {
-    id: 2,
-    doctor: 'Dr. Rajesh Kumar',
-    specialty: 'Neurologist',
-    date: '2024-01-18',
-    time: '2:00 PM',
-    status: 'upcoming',
-    hospital: 'Apollo Chennai'
-  }, {
-    id: 3,
-    doctor: 'Dr. Sunita Patel',
-    specialty: 'Dermatologist',
-    date: '2024-01-10',
-    time: '11:00 AM',
-    status: 'completed',
-    hospital: 'Fortis Mumbai'
-  }]);
-  const [prescriptions] = useState([{
-    id: 1,
-    doctor: 'Dr. Priya Sharma',
-    medication: 'Atorvastatin 10mg',
-    dosage: 'Once daily after dinner',
-    date: '2024-01-10'
-  }, {
-    id: 2,
-    doctor: 'Dr. Rajesh Kumar',
-    medication: 'Paracetamol 500mg',
-    dosage: 'Twice daily after meals',
-    date: '2024-01-08'
-  }]);
-  const vitals = {
-    bloodPressure: '120/80',
-    heartRate: '72 bpm',
-    weight: '68 kg',
-    height: '5\'7"',
-    bloodSugar: '95 mg/dL',
-    temperature: '98.6°F'
-  };
-  return <div className="min-h-screen bg-gradient-to-br from-arogya-light-blue/20 via-white to-arogya-beige-yellow/10">
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-arogya-light-blue/20 via-white to-arogya-beige-yellow/10">
+        <Header />
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+          <div className="flex items-center justify-center h-64">
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-arogya-dark-green"></div>
+          </div>
+        </div>
+        <Footer />
+      </div>
+    );
+  }
+
+  const upcomingAppointments = appointments.filter(apt => apt.status === 'scheduled');
+  const nextAppointment = upcomingAppointments[0];
+  const activePrescriptions = prescriptions.filter(p => p.status === 'active');
+
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-arogya-light-blue/20 via-white to-arogya-beige-yellow/10">
       <Header />
       
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="mb-8">
-          <h1 className="text-3xl font-bold text-arogya-dark-teal mb-2">Hello, Patient!</h1>
+          <h1 className="text-3xl font-bold text-arogya-dark-teal mb-2">
+            Hello, {profile?.full_name || 'Patient'}!
+          </h1>
           <p className="text-gray-600">Welcome to your personal health dashboard</p>
         </div>
 
         {/* Subscription upgrade banner */}
-        {showUpgrade && <SubscriptionUpgrade variant="banner" context="dashboard" onClose={() => setShowUpgrade(false)} />}
+        {showUpgrade && (
+          <SubscriptionUpgrade 
+            variant="banner" 
+            context="dashboard" 
+            onClose={() => setShowUpgrade(false)} 
+          />
+        )}
 
         {/* Quick Stats */}
         <div className="grid lg:grid-cols-4 gap-6 mb-8">
@@ -74,8 +62,19 @@ const PatientDashboard = () => {
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-green-100">Next Appointment</p>
-                  <p className="text-2xl font-bold text-white">Jan 15</p>
-                  <p className="text-green-100">Dr. Priya Sharma</p>
+                  {nextAppointment ? (
+                    <>
+                      <p className="text-2xl font-bold text-white">
+                        {format(new Date(nextAppointment.appointment_date), 'MMM dd')}
+                      </p>
+                      <p className="text-green-100">{nextAppointment.doctor.full_name}</p>
+                    </>
+                  ) : (
+                    <>
+                      <p className="text-2xl font-bold text-white">None</p>
+                      <p className="text-green-100">No upcoming appointments</p>
+                    </>
+                  )}
                 </div>
                 <Calendar className="w-8 h-8 text-green-200" />
               </div>
@@ -100,8 +99,10 @@ const PatientDashboard = () => {
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-gray-600">Active Prescriptions</p>
-                  <p className="text-2xl font-bold text-gray-900">4</p>
-                  <p className="text-arogya-dark-green text-sm">2 expiring soon</p>
+                  <p className="text-2xl font-bold text-gray-900">{activePrescriptions.length}</p>
+                  <p className="text-arogya-dark-green text-sm">
+                    {activePrescriptions.length} medications
+                  </p>
                 </div>
                 <FileText className="w-8 h-8 text-arogya-dark-green" />
               </div>
@@ -143,30 +144,45 @@ const PatientDashboard = () => {
               </CardHeader>
               <CardContent>
                 <div className="space-y-4">
-                  {appointments.map(appointment => <div key={appointment.id} className="flex items-center justify-between p-4 border border-gray-200 rounded-lg hover:bg-gray-50">
-                      <div className="flex items-center space-x-4">
-                        <div className="w-12 h-12 bg-arogya-light-blue rounded-full flex items-center justify-center">
-                          <User className="w-6 h-6 text-arogya-dark-green" />
+                  {appointments.length === 0 ? (
+                    <div className="text-center py-8">
+                      <Calendar className="w-16 h-16 text-gray-400 mx-auto mb-4" />
+                      <h3 className="text-lg font-medium text-gray-900 mb-2">No Appointments</h3>
+                      <p className="text-gray-600">You don't have any appointments scheduled.</p>
+                    </div>
+                  ) : (
+                    appointments.map(appointment => (
+                      <div key={appointment.id} className="flex items-center justify-between p-4 border border-gray-200 rounded-lg hover:bg-gray-50">
+                        <div className="flex items-center space-x-4">
+                          <div className="w-12 h-12 bg-arogya-light-blue rounded-full flex items-center justify-center">
+                            <User className="w-6 h-6 text-arogya-dark-green" />
+                          </div>
+                          <div>
+                            <h3 className="font-semibold text-gray-900">{appointment.doctor.full_name}</h3>
+                            <p className="text-gray-600">
+                              {appointment.doctor.specialization}
+                              {appointment.hospital && ` • ${appointment.hospital.full_name}`}
+                            </p>
+                            <p className="text-sm text-gray-500 flex items-center">
+                              <Calendar className="w-4 h-4 mr-1" />
+                              {format(new Date(appointment.appointment_date), 'MMM dd, yyyy')} at {appointment.appointment_time}
+                            </p>
+                          </div>
                         </div>
-                        <div>
-                          <h3 className="font-semibold text-gray-900">{appointment.doctor}</h3>
-                          <p className="text-gray-600">{appointment.specialty} • {appointment.hospital}</p>
-                          <p className="text-sm text-gray-500 flex items-center">
-                            <Calendar className="w-4 h-4 mr-1" />
-                            {appointment.date} at {appointment.time}
-                          </p>
+                        <div className="flex items-center space-x-3">
+                          <Badge variant={appointment.status === 'scheduled' ? 'default' : 'secondary'}>
+                            {appointment.status}
+                          </Badge>
+                          {appointment.status === 'scheduled' && (
+                            <Button size="sm" className="bg-arogya-dark-green hover:bg-arogya-light-green text-white">
+                              <Video className="w-4 h-4 mr-2" />
+                              Join Call
+                            </Button>
+                          )}
                         </div>
                       </div>
-                      <div className="flex items-center space-x-3">
-                        <Badge variant={appointment.status === 'upcoming' ? 'default' : 'secondary'}>
-                          {appointment.status}
-                        </Badge>
-                        {appointment.status === 'upcoming' && <Button size="sm" className="bg-arogya-dark-green hover:bg-arogya-light-green text-white">
-                            <Video className="w-4 h-4 mr-2" />
-                            Join Call
-                          </Button>}
-                      </div>
-                    </div>)}
+                    ))
+                  )}
                 </div>
               </CardContent>
             </Card>
@@ -179,13 +195,54 @@ const PatientDashboard = () => {
               </CardHeader>
               <CardContent>
                 <div className="grid md:grid-cols-3 gap-6">
-                  {Object.entries(vitals).map(([key, value]) => <div key={key} className="text-center p-4 bg-arogya-light-blue rounded-lg">
+                  {Object.entries(vitals).map(([key, value]) => (
+                    <div key={key} className="text-center p-4 bg-arogya-light-blue rounded-lg">
                       <h3 className="text-lg font-semibold text-arogya-dark-teal mb-2 capitalize">
                         {key.replace(/([A-Z])/g, ' $1').trim()}
                       </h3>
                       <p className="text-2xl font-bold text-gray-900">{value}</p>
                       <p className="text-sm text-gray-600 mt-1">Normal range</p>
-                    </div>)}
+                    </div>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          <TabsContent value="prescriptions">
+            <Card>
+              <CardHeader>
+                <CardTitle>Current Prescriptions</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-4">
+                  {prescriptions.length === 0 ? (
+                    <div className="text-center py-8">
+                      <FileText className="w-16 h-16 text-gray-400 mx-auto mb-4" />
+                      <h3 className="text-lg font-medium text-gray-900 mb-2">No Prescriptions</h3>
+                      <p className="text-gray-600">You don't have any active prescriptions.</p>
+                    </div>
+                  ) : (
+                    prescriptions.map(prescription => (
+                      <div key={prescription.id} className="p-4 border border-gray-200 rounded-lg">
+                        <div className="flex justify-between items-start">
+                          <div>
+                            <h3 className="font-semibold text-gray-900">{prescription.medication_name}</h3>
+                            <p className="text-gray-600">{prescription.dosage} - {prescription.frequency}</p>
+                            <p className="text-sm text-gray-500">
+                              Prescribed by {prescription.doctor.full_name} on {format(new Date(prescription.prescribed_date), 'MMM dd, yyyy')}
+                            </p>
+                            <Badge variant={prescription.status === 'active' ? 'default' : 'secondary'} className="mt-2">
+                              {prescription.status}
+                            </Badge>
+                          </div>
+                          <Button variant="outline" size="sm">
+                            Reorder
+                          </Button>
+                        </div>
+                      </div>
+                    ))
+                  )}
                 </div>
               </CardContent>
             </Card>
@@ -247,30 +304,6 @@ const PatientDashboard = () => {
             </Card>
           </TabsContent>
 
-          <TabsContent value="prescriptions">
-            <Card>
-              <CardHeader>
-                <CardTitle>Current Prescriptions</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-4">
-                  {prescriptions.map(prescription => <div key={prescription.id} className="p-4 border border-gray-200 rounded-lg">
-                      <div className="flex justify-between items-start">
-                        <div>
-                          <h3 className="font-semibold text-gray-900">{prescription.medication}</h3>
-                          <p className="text-gray-600">{prescription.dosage}</p>
-                          <p className="text-sm text-gray-500">Prescribed by {prescription.doctor} on {prescription.date}</p>
-                        </div>
-                        <Button variant="outline" size="sm">
-                          Reorder
-                        </Button>
-                      </div>
-                    </div>)}
-                </div>
-              </CardContent>
-            </Card>
-          </TabsContent>
-
           <TabsContent value="records">
             <Card>
               <CardHeader>
@@ -292,6 +325,8 @@ const PatientDashboard = () => {
       </div>
       
       <Footer />
-    </div>;
+    </div>
+  );
 };
+
 export default PatientDashboard;
