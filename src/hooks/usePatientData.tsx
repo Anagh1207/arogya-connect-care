@@ -81,11 +81,11 @@ export const usePatientData = () => {
           symptoms,
           diagnosis,
           doctors!inner(
-            profiles!inner(full_name),
+            id,
             specialization
           ),
           hospitals(
-            profiles!inner(full_name)
+            id
           )
         `)
         .eq('patient_id', user.id)
@@ -93,23 +93,44 @@ export const usePatientData = () => {
 
       if (error) throw error;
 
-      const formattedAppointments = data?.map(apt => ({
-        id: apt.id,
-        doctor: {
-          full_name: apt.doctors?.profiles?.full_name || 'Unknown Doctor',
-          specialization: apt.doctors?.specialization || 'General Medicine'
-        },
-        hospital: apt.hospitals?.profiles ? {
-          full_name: apt.hospitals.profiles.full_name
-        } : undefined,
-        appointment_date: apt.appointment_date,
-        appointment_time: apt.appointment_time,
-        status: apt.status,
-        symptoms: apt.symptoms,
-        diagnosis: apt.diagnosis
-      })) || [];
+      // Fetch doctor and hospital profiles separately to avoid the relationship ambiguity
+      const appointmentsWithDetails = await Promise.all((data || []).map(async (apt) => {
+        // Fetch doctor profile
+        const { data: doctorProfile } = await supabase
+          .from('profiles')
+          .select('full_name')
+          .eq('id', apt.doctors.id)
+          .single();
 
-      setAppointments(formattedAppointments);
+        // Fetch hospital profile if hospital_id exists
+        let hospitalProfile = null;
+        if (apt.hospitals?.id) {
+          const { data: hospitalData } = await supabase
+            .from('profiles')
+            .select('full_name')
+            .eq('id', apt.hospitals.id)
+            .single();
+          hospitalProfile = hospitalData;
+        }
+
+        return {
+          id: apt.id,
+          doctor: {
+            full_name: doctorProfile?.full_name || 'Unknown Doctor',
+            specialization: apt.doctors?.specialization || 'General Medicine'
+          },
+          hospital: hospitalProfile ? {
+            full_name: hospitalProfile.full_name
+          } : undefined,
+          appointment_date: apt.appointment_date,
+          appointment_time: apt.appointment_time,
+          status: apt.status,
+          symptoms: apt.symptoms,
+          diagnosis: apt.diagnosis
+        };
+      }));
+
+      setAppointments(appointmentsWithDetails);
     } catch (error: any) {
       console.error('Error fetching appointments:', error);
       toast({
@@ -136,7 +157,7 @@ export const usePatientData = () => {
           status,
           prescribed_date,
           doctors!inner(
-            profiles!inner(full_name)
+            id
           )
         `)
         .eq('patient_id', user.id)
@@ -144,21 +165,30 @@ export const usePatientData = () => {
 
       if (error) throw error;
 
-      const formattedPrescriptions = data?.map(prescription => ({
-        id: prescription.id,
-        doctor: {
-          full_name: prescription.doctors?.profiles?.full_name || 'Unknown Doctor'
-        },
-        medication_name: prescription.medication_name,
-        dosage: prescription.dosage,
-        frequency: prescription.frequency,
-        duration: prescription.duration,
-        instructions: prescription.instructions,
-        status: prescription.status,
-        prescribed_date: prescription.prescribed_date
-      })) || [];
+      // Fetch doctor profiles separately
+      const prescriptionsWithDetails = await Promise.all((data || []).map(async (prescription) => {
+        const { data: doctorProfile } = await supabase
+          .from('profiles')
+          .select('full_name')
+          .eq('id', prescription.doctors.id)
+          .single();
 
-      setPrescriptions(formattedPrescriptions);
+        return {
+          id: prescription.id,
+          doctor: {
+            full_name: doctorProfile?.full_name || 'Unknown Doctor'
+          },
+          medication_name: prescription.medication_name,
+          dosage: prescription.dosage,
+          frequency: prescription.frequency,
+          duration: prescription.duration,
+          instructions: prescription.instructions,
+          status: prescription.status,
+          prescribed_date: prescription.prescribed_date
+        };
+      }));
+
+      setPrescriptions(prescriptionsWithDetails);
     } catch (error: any) {
       console.error('Error fetching prescriptions:', error);
       toast({
