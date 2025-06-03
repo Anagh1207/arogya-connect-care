@@ -12,15 +12,38 @@ const Login = () => {
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [errors, setErrors] = useState<Record<string, string>>({});
   const navigate = useNavigate();
   const { signIn } = useAuth();
 
+  const validateForm = () => {
+    const newErrors: Record<string, string> = {};
+
+    if (!email.trim()) {
+      newErrors.email = 'Email is required';
+    } else if (!/\S+@\S+\.\S+/.test(email)) {
+      newErrors.email = 'Email is invalid';
+    }
+
+    if (!password) {
+      newErrors.password = 'Password is required';
+    }
+
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
+
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    if (!validateForm()) {
+      return;
+    }
+
     setIsLoading(true);
     
     try {
-      await signIn(email, password);
+      await signIn(email.trim(), password);
       // Redirection will happen automatically via useAuth hook
     } catch (error) {
       console.error('Login error:', error);
@@ -83,7 +106,6 @@ const Login = () => {
                 <p className="text-gray-600">Access your healthcare dashboard</p>
               </CardHeader>
               <CardContent>
-                {/* Login Form */}
                 <form onSubmit={handleLogin} className="space-y-4">
                   <div className="relative">
                     <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
@@ -92,9 +114,14 @@ const Login = () => {
                       placeholder="Email address"
                       value={email}
                       onChange={(e) => setEmail(e.target.value)}
-                      className="pl-10 h-12 border-2 focus:border-arogya-dark-green"
+                      className={`pl-10 h-12 border-2 focus:border-arogya-dark-green ${
+                        errors.email ? 'border-red-500' : ''
+                      }`}
                       required
                     />
+                    {errors.email && (
+                      <p className="text-red-500 text-xs mt-1">{errors.email}</p>
+                    )}
                   </div>
 
                   <div className="relative">
@@ -104,7 +131,9 @@ const Login = () => {
                       placeholder="Password"
                       value={password}
                       onChange={(e) => setPassword(e.target.value)}
-                      className="pl-10 pr-10 h-12 border-2 focus:border-arogya-dark-green"
+                      className={`pl-10 pr-10 h-12 border-2 focus:border-arogya-dark-green ${
+                        errors.password ? 'border-red-500' : ''
+                      }`}
                       required
                     />
                     <button
@@ -114,6 +143,9 @@ const Login = () => {
                     >
                       {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
                     </button>
+                    {errors.password && (
+                      <p className="text-red-500 text-xs mt-1">{errors.password}</p>
+                    )}
                   </div>
 
                   <Button 

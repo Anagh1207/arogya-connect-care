@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { useNavigate } from 'react-router-dom';
-import { Eye, EyeOff, Mail, Lock, User, Heart, UserPlus, Phone, Chrome } from 'lucide-react';
+import { Eye, EyeOff, Mail, Lock, User, Heart, UserPlus, Phone } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 
 const Signup = () => {
@@ -18,19 +18,44 @@ const Signup = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [userType, setUserType] = useState<'patient' | 'doctor' | 'hospital' | 'admin'>('patient');
-  const [signupMethod, setSignupMethod] = useState<'email'>('email');
   const [isLoading, setIsLoading] = useState(false);
+  const [errors, setErrors] = useState<Record<string, string>>({});
   const navigate = useNavigate();
   const { signUp } = useAuth();
 
-  const handleEmailSignup = async (e: React.FormEvent) => {
-    e.preventDefault();
-    
-    if (formData.password !== formData.confirmPassword) {
-      return;
+  const validateForm = () => {
+    const newErrors: Record<string, string> = {};
+
+    if (!formData.name.trim()) {
+      newErrors.name = 'Name is required';
     }
 
-    if (formData.password.length < 6) {
+    if (!formData.email.trim()) {
+      newErrors.email = 'Email is required';
+    } else if (!/\S+@\S+\.\S+/.test(formData.email)) {
+      newErrors.email = 'Email is invalid';
+    }
+
+    if (!formData.password) {
+      newErrors.password = 'Password is required';
+    } else if (formData.password.length < 6) {
+      newErrors.password = 'Password must be at least 6 characters';
+    }
+
+    if (!formData.confirmPassword) {
+      newErrors.confirmPassword = 'Please confirm your password';
+    } else if (formData.password !== formData.confirmPassword) {
+      newErrors.confirmPassword = 'Passwords do not match';
+    }
+
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    if (!validateForm()) {
       return;
     }
 
@@ -38,9 +63,9 @@ const Signup = () => {
     
     try {
       await signUp(formData.email, formData.password, {
-        full_name: formData.name,
+        name: formData.name,
         role: userType,
-        phone: formData.phoneNumber
+        phoneNumber: formData.phoneNumber
       });
     } catch (error) {
       console.error('Signup error:', error);
@@ -127,8 +152,7 @@ const Signup = () => {
                   </div>
                 </div>
 
-                {/* Email Signup Form */}
-                <form onSubmit={handleEmailSignup} className="space-y-4">
+                <form onSubmit={handleSubmit} className="space-y-4">
                   <div className="relative">
                     <User className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
                     <Input
@@ -136,9 +160,14 @@ const Signup = () => {
                       placeholder="Full name"
                       value={formData.name}
                       onChange={(e) => setFormData({...formData, name: e.target.value})}
-                      className="pl-10 h-12 border-2 focus:border-arogya-dark-green"
+                      className={`pl-10 h-12 border-2 focus:border-arogya-dark-green ${
+                        errors.name ? 'border-red-500' : ''
+                      }`}
                       required
                     />
+                    {errors.name && (
+                      <p className="text-red-500 text-xs mt-1">{errors.name}</p>
+                    )}
                   </div>
 
                   <div className="relative">
@@ -148,9 +177,14 @@ const Signup = () => {
                       placeholder="Email address"
                       value={formData.email}
                       onChange={(e) => setFormData({...formData, email: e.target.value})}
-                      className="pl-10 h-12 border-2 focus:border-arogya-dark-green"
+                      className={`pl-10 h-12 border-2 focus:border-arogya-dark-green ${
+                        errors.email ? 'border-red-500' : ''
+                      }`}
                       required
                     />
+                    {errors.email && (
+                      <p className="text-red-500 text-xs mt-1">{errors.email}</p>
+                    )}
                   </div>
 
                   <div className="relative">
@@ -171,7 +205,9 @@ const Signup = () => {
                       placeholder="Password (min. 6 characters)"
                       value={formData.password}
                       onChange={(e) => setFormData({...formData, password: e.target.value})}
-                      className="pl-10 pr-10 h-12 border-2 focus:border-arogya-dark-green"
+                      className={`pl-10 pr-10 h-12 border-2 focus:border-arogya-dark-green ${
+                        errors.password ? 'border-red-500' : ''
+                      }`}
                       required
                     />
                     <button
@@ -181,6 +217,9 @@ const Signup = () => {
                     >
                       {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
                     </button>
+                    {errors.password && (
+                      <p className="text-red-500 text-xs mt-1">{errors.password}</p>
+                    )}
                   </div>
 
                   <div className="relative">
@@ -190,7 +229,9 @@ const Signup = () => {
                       placeholder="Confirm password"
                       value={formData.confirmPassword}
                       onChange={(e) => setFormData({...formData, confirmPassword: e.target.value})}
-                      className="pl-10 pr-10 h-12 border-2 focus:border-arogya-dark-green"
+                      className={`pl-10 pr-10 h-12 border-2 focus:border-arogya-dark-green ${
+                        errors.confirmPassword ? 'border-red-500' : ''
+                      }`}
                       required
                     />
                     <button
@@ -200,6 +241,9 @@ const Signup = () => {
                     >
                       {showConfirmPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
                     </button>
+                    {errors.confirmPassword && (
+                      <p className="text-red-500 text-xs mt-1">{errors.confirmPassword}</p>
+                    )}
                   </div>
 
                   <Button 
