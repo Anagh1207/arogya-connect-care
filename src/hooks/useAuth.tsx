@@ -1,3 +1,4 @@
+
 import { useState, useEffect, createContext, useContext, ReactNode } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { User, Session } from '@supabase/supabase-js';
@@ -61,11 +62,17 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         .eq('id', userId)
         .single();
 
-      if (error) throw error;
+      if (error) {
+        console.error('Error fetching profile:', error);
+        throw error;
+      }
+      
       setProfile(data);
+      return data;
     } catch (error) {
       console.error('Error fetching profile:', error);
       setProfile(null);
+      throw error;
     }
   };
 
@@ -116,8 +123,12 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
         if (event === 'SIGNED_IN' && session?.user) {
           setTimeout(async () => {
-            await fetchProfile(session.user.id);
-          }, 0);
+            try {
+              await fetchProfile(session.user.id);
+            } catch (error) {
+              console.error('Error fetching profile after sign in:', error);
+            }
+          }, 100);
         } else if (event === 'SIGNED_OUT') {
           setProfile(null);
           cleanupAuthState();
@@ -164,7 +175,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
           title: "Success",
           description: "Signed in successfully!",
         });
-        // Note: redirection will happen automatically via useEffect when profile loads
+        // Profile fetch and redirection will happen in auth state change handler
       }
     } catch (error: any) {
       toast({
@@ -188,6 +199,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         password,
         options: {
           data: userData,
+          emailRedirectTo: `${window.location.origin}/login`
         },
       });
 
@@ -198,9 +210,10 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         description: "Account created successfully! Please check your email for verification.",
       });
 
-      if (data.user) {
+      // Redirect to login page after successful signup
+      setTimeout(() => {
         window.location.href = '/login';
-      }
+      }, 2000);
     } catch (error: any) {
       toast({
         title: "Error",

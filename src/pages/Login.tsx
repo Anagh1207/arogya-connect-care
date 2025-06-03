@@ -11,7 +11,6 @@ const Login = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
-  const [userType, setUserType] = useState<'patient' | 'doctor' | 'hospital' | 'admin'>('patient');
   const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
   const { signIn } = useAuth();
@@ -84,30 +83,6 @@ const Login = () => {
                 <p className="text-gray-600">Access your healthcare dashboard</p>
               </CardHeader>
               <CardContent>
-                {/* User Type Selection */}
-                <div className="mb-6">
-                  <label className="block text-sm font-medium text-gray-700 mb-3">
-                    I am a
-                  </label>
-                  <div className="grid grid-cols-2 gap-2">
-                    {(['patient', 'doctor', 'hospital', 'admin'] as const).map((type) => (
-                      <Button
-                        key={type}
-                        type="button"
-                        variant={userType === type ? "default" : "outline"}
-                        onClick={() => setUserType(type)}
-                        className={`transition-all duration-300 ${
-                          userType === type 
-                            ? "bg-arogya-dark-green text-white shadow-lg scale-105" 
-                            : "hover:bg-arogya-light-blue/30"
-                        }`}
-                      >
-                        {type.charAt(0).toUpperCase() + type.slice(1)}
-                      </Button>
-                    ))}
-                  </div>
-                </div>
-
                 {/* Login Form */}
                 <form onSubmit={handleLogin} className="space-y-4">
                   <div className="relative">
