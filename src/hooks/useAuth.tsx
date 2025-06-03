@@ -35,6 +35,25 @@ export const useAuth = () => {
   return context;
 };
 
+// Clean up auth state utility
+const cleanupAuthState = () => {
+  console.log('Cleaning up auth state...');
+  
+  // Remove all Supabase auth keys from localStorage
+  Object.keys(localStorage).forEach((key) => {
+    if (key.startsWith('supabase.auth.') || key.includes('sb-')) {
+      localStorage.removeItem(key);
+    }
+  });
+  
+  // Remove from sessionStorage if in use
+  Object.keys(sessionStorage || {}).forEach((key) => {
+    if (key.startsWith('supabase.auth.') || key.includes('sb-')) {
+      sessionStorage.removeItem(key);
+    }
+  });
+};
+
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [user, setUser] = useState<User | null>(null);
   const [profile, setProfile] = useState<Profile | null>(null);
@@ -67,25 +86,29 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
   const redirectToDashboard = (role: string) => {
     console.log('Redirecting to dashboard for role:', role);
-    switch(role) {
-      case 'patient':
-        window.location.href = '/patient-dashboard';
-        break;
-      case 'doctor':
-        window.location.href = '/doctor-dashboard';
-        break;
-      case 'hospital':
-        window.location.href = '/hospital-dashboard';
-        break;
-      case 'admin':
-        window.location.href = '/admin-panel';
-        break;
-      default:
-        window.location.href = '/';
-    }
+    setTimeout(() => {
+      switch(role) {
+        case 'patient':
+          window.location.href = '/patient-dashboard';
+          break;
+        case 'doctor':
+          window.location.href = '/doctor-dashboard';
+          break;
+        case 'hospital':
+          window.location.href = '/hospital-dashboard';
+          break;
+        case 'admin':
+          window.location.href = '/admin-panel';
+          break;
+        default:
+          window.location.href = '/';
+      }
+    }, 100);
   };
 
   useEffect(() => {
+    console.log('Setting up auth listeners...');
+    
     // Set up auth state listener
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (event, session) => {
@@ -95,16 +118,18 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         setUser(session?.user ?? null);
 
         if (event === 'SIGNED_IN' && session?.user) {
-          // Fetch profile after sign in
-          const profileData = await fetchProfile(session.user.id);
-          if (profileData) {
-            const currentPath = window.location.pathname;
-            const isOnAuthPage = currentPath === '/login' || currentPath === '/signup';
-            
-            if (isOnAuthPage) {
-              redirectToDashboard(profileData.role);
+          // Defer profile fetch to prevent deadlock
+          setTimeout(async () => {
+            const profileData = await fetchProfile(session.user.id);
+            if (profileData) {
+              const currentPath = window.location.pathname;
+              const isOnAuthPage = currentPath === '/login' || currentPath === '/signup';
+              
+              if (isOnAuthPage) {
+                redirectToDashboard(profileData.role);
+              }
             }
-          }
+          }, 0);
         } else if (event === 'SIGNED_OUT') {
           setProfile(null);
         }
@@ -122,7 +147,9 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         if (session?.user) {
           setSession(session);
           setUser(session.user);
-          await fetchProfile(session.user.id);
+          setTimeout(() => {
+            fetchProfile(session.user.id);
+          }, 0);
         }
       } catch (error) {
         console.error('Error checking session:', error);
@@ -141,6 +168,16 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       setLoading(true);
       console.log('Attempting to sign in with:', email);
 
+      // Clean up any existing auth state first
+      cleanupAuthState();
+      
+      // Attempt global sign out first
+      try {
+        await supabase.auth.signOut({ scope: 'global' });
+      } catch (err) {
+        console.log('Global signout failed (expected):', err);
+      }
+
       const { data, error } = await supabase.auth.signInWithPassword({
         email: email.trim(),
         password: password,
@@ -148,6 +185,11 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
       if (error) {
         console.error('Sign in error:', error);
+        toast({
+          title: "Error",
+          description: error.message || "Failed to sign in",
+          variant: "destructive",
+        });
         throw error;
       }
 
@@ -177,12 +219,23 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       setLoading(true);
       console.log('Attempting to sign up with:', email, userData);
 
+      // Clean up any existing auth state first
+      cleanupAuthState();
+      
+      // Attempt global sign out first
+      try {
+        await supabase.auth.signOut({ scope: 'global' });
+      } catch (err) {
+        console.log('Global signout failed (expected):', err);
+      }
+
       const { data, error } = await supabase.auth.signUp({
         email: email.trim(),
         password: password,
         options: {
           data: {
             full_name: userData.name,
+            name: userData.name, // Fallback for the trigger
             role: userData.role,
             phone: userData.phoneNumber || null,
           },
@@ -191,6 +244,11 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
       if (error) {
         console.error('Sign up error:', error);
+        toast({
+          title: "Error",
+          description: error.message || "Failed to create account",
+          variant: "destructive",
+        });
         throw error;
       }
 
@@ -233,7 +291,17 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const signOut = async () => {
     try {
       console.log('Signing out...');
-      await supabase.auth.signOut();
+      
+      // Clean up auth state first
+      cleanupAuthState();
+      
+      // Attempt global sign out
+      try {
+        await supabase.auth.signOut({ scope: 'global' });
+      } catch (err) {
+        console.log('Sign out error (continuing anyway):', err);
+      }
+      
       setUser(null);
       setProfile(null);
       setSession(null);
@@ -243,6 +311,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         description: "Signed out successfully!",
       });
       
+      // Force page reload for clean state
       window.location.href = '/';
     } catch (error: any) {
       console.error('Sign out error:', error);
