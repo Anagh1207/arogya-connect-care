@@ -35,6 +35,20 @@ export const useAuth = () => {
   return context;
 };
 
+// Cleanup auth state utility
+const cleanupAuthState = () => {
+  Object.keys(localStorage).forEach((key) => {
+    if (key.startsWith('supabase.auth.') || key.includes('sb-')) {
+      localStorage.removeItem(key);
+    }
+  });
+  Object.keys(sessionStorage || {}).forEach((key) => {
+    if (key.startsWith('supabase.auth.') || key.includes('sb-')) {
+      sessionStorage.removeItem(key);
+    }
+  });
+};
+
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [user, setUser] = useState<User | null>(null);
   const [profile, setProfile] = useState<Profile | null>(null);
@@ -149,6 +163,17 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       setLoading(true);
       console.log('Attempting to sign in with:', email);
 
+      // Clean up any existing auth state first
+      cleanupAuthState();
+      
+      // Attempt global sign out first
+      try {
+        await supabase.auth.signOut({ scope: 'global' });
+      } catch (err) {
+        // Continue even if this fails
+        console.log('Global signout failed, continuing...');
+      }
+
       const { data, error } = await supabase.auth.signInWithPassword({
         email: email.trim(),
         password: password,
@@ -190,10 +215,22 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       setLoading(true);
       console.log('Attempting to sign up with:', email, userData);
 
+      // Clean up any existing auth state first
+      cleanupAuthState();
+      
+      // Attempt global sign out first
+      try {
+        await supabase.auth.signOut({ scope: 'global' });
+      } catch (err) {
+        // Continue even if this fails
+        console.log('Global signout failed, continuing...');
+      }
+
       const { data, error } = await supabase.auth.signUp({
         email: email.trim(),
         password: password,
         options: {
+          emailRedirectTo: `${window.location.origin}/`,
           data: {
             full_name: userData.name,
             name: userData.name, // Fallback for the trigger
@@ -253,7 +290,16 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     try {
       console.log('Signing out...');
       
-      await supabase.auth.signOut();
+      // Clean up auth state first
+      cleanupAuthState();
+      
+      // Attempt global sign out
+      try {
+        await supabase.auth.signOut({ scope: 'global' });
+      } catch (err) {
+        // Continue even if this fails
+        console.log('Global signout failed, continuing...');
+      }
       
       setUser(null);
       setProfile(null);
@@ -264,7 +310,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         description: "Signed out successfully!",
       });
       
-      // Redirect to home page
+      // Force page reload for clean state
       window.location.href = '/';
     } catch (error: any) {
       console.error('Sign out error:', error);
