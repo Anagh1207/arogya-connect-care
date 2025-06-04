@@ -145,50 +145,58 @@ export const usePatientData = () => {
     if (!user) return;
 
     try {
+      // Use a direct query since the types aren't updated yet
       const { data, error } = await supabase
-        .from('prescriptions')
-        .select(`
-          id,
-          medication_name,
-          dosage,
-          frequency,
-          duration,
-          instructions,
-          status,
-          prescribed_date,
-          doctors!inner(
-            id
-          )
-        `)
-        .eq('patient_id', user.id)
-        .order('prescribed_date', { ascending: false });
+        .rpc('get_patient_prescriptions', { patient_user_id: user.id });
 
-      if (error) throw error;
+      if (error) {
+        // If the RPC doesn't exist, fall back to a direct query
+        const { data: directData, error: directError } = await supabase
+          .from('prescriptions' as any)
+          .select(`
+            id,
+            medication_name,
+            dosage,
+            frequency,
+            duration,
+            instructions,
+            status,
+            prescribed_date,
+            doctor_id
+          `)
+          .eq('patient_id', user.id)
+          .order('prescribed_date', { ascending: false });
 
-      // Fetch doctor profiles separately
-      const prescriptionsWithDetails = await Promise.all((data || []).map(async (prescription) => {
-        const { data: doctorProfile } = await supabase
-          .from('profiles')
-          .select('full_name')
-          .eq('id', prescription.doctors.id)
-          .single();
+        if (directError) throw directError;
 
-        return {
-          id: prescription.id,
-          doctor: {
-            full_name: doctorProfile?.full_name || 'Unknown Doctor'
-          },
-          medication_name: prescription.medication_name,
-          dosage: prescription.dosage,
-          frequency: prescription.frequency,
-          duration: prescription.duration,
-          instructions: prescription.instructions,
-          status: prescription.status,
-          prescribed_date: prescription.prescribed_date
-        };
-      }));
+        // Fetch doctor profiles separately
+        const prescriptionsWithDetails = await Promise.all((directData || []).map(async (prescription: any) => {
+          const { data: doctorProfile } = await supabase
+            .from('profiles')
+            .select('full_name')
+            .eq('id', prescription.doctor_id)
+            .single();
 
-      setPrescriptions(prescriptionsWithDetails);
+          return {
+            id: prescription.id,
+            doctor: {
+              full_name: doctorProfile?.full_name || 'Unknown Doctor'
+            },
+            medication_name: prescription.medication_name,
+            dosage: prescription.dosage,
+            frequency: prescription.frequency,
+            duration: prescription.duration,
+            instructions: prescription.instructions,
+            status: prescription.status,
+            prescribed_date: prescription.prescribed_date
+          };
+        }));
+
+        setPrescriptions(prescriptionsWithDetails);
+        return;
+      }
+
+      setPrescriptions(data || []);
     } catch (error: any) {
       console.error('Error fetching prescriptions:', error);
       toast({
