@@ -145,58 +145,49 @@ export const usePatientData = () => {
     if (!user) return;
 
     try {
-      // Use a direct query since the types aren't updated yet
+      // Direct query to prescriptions table
       const { data, error } = await supabase
-        .rpc('get_patient_prescriptions', { patient_user_id: user.id });
+        .from('prescriptions')
+        .select(`
+          id,
+          medication_name,
+          dosage,
+          frequency,
+          duration,
+          instructions,
+          status,
+          prescribed_date,
+          doctor_id
+        `)
+        .eq('patient_id', user.id)
+        .order('prescribed_date', { ascending: false });
 
-      if (error) {
-        // If the RPC doesn't exist, fall back to a direct query
-        const { data: directData, error: directError } = await supabase
-          .from('prescriptions' as any)
-          .select(`
-            id,
-            medication_name,
-            dosage,
-            frequency,
-            duration,
-            instructions,
-            status,
-            prescribed_date,
-            doctor_id
-          `)
-          .eq('patient_id', user.id)
-          .order('prescribed_date', { ascending: false });
+      if (error) throw error;
 
-        if (directError) throw directError;
+      // Fetch doctor profiles separately
+      const prescriptionsWithDetails = await Promise.all((data || []).map(async (prescription) => {
+        const { data: doctorProfile } = await supabase
+          .from('profiles')
+          .select('full_name')
+          .eq('id', prescription.doctor_id)
+          .single();
 
-        // Fetch doctor profiles separately
-        const prescriptionsWithDetails = await Promise.all((directData || []).map(async (prescription: any) => {
-          const { data: doctorProfile } = await supabase
-            .from('profiles')
-            .select('full_name')
-            .eq('id', prescription.doctor_id)
-            .single();
+        return {
+          id: prescription.id,
+          doctor: {
+            full_name: doctorProfile?.full_name || 'Unknown Doctor'
+          },
+          medication_name: prescription.medication_name,
+          dosage: prescription.dosage,
+          frequency: prescription.frequency,
+          duration: prescription.duration,
+          instructions: prescription.instructions,
+          status: prescription.status,
+          prescribed_date: prescription.prescribed_date
+        };
+      }));
 
-          return {
-            id: prescription.id,
-            doctor: {
-              full_name: doctorProfile?.full_name || 'Unknown Doctor'
-            },
-            medication_name: prescription.medication_name,
-            dosage: prescription.dosage,
-            frequency: prescription.frequency,
-            duration: prescription.duration,
-            instructions: prescription.instructions,
-            status: prescription.status,
-            prescribed_date: prescription.prescribed_date
-          };
-        }));
-
-        setPrescriptions(prescriptionsWithDetails);
-        return;
-      }
-
-      setPrescriptions(data || []);
+      setPrescriptions(prescriptionsWithDetails);
     } catch (error: any) {
       console.error('Error fetching prescriptions:', error);
       toast({
