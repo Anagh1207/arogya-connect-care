@@ -54,6 +54,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [profile, setProfile] = useState<Profile | null>(null);
   const [session, setSession] = useState<Session | null>(null);
   const [loading, setLoading] = useState(true);
+  const [isInitialized, setIsInitialized] = useState(false);
 
   const fetchProfile = async (userId: string) => {
     try {
@@ -81,24 +82,25 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
   const redirectToDashboard = (role: string) => {
     console.log('Redirecting to dashboard for role:', role);
-    setTimeout(() => {
-      switch(role) {
-        case 'patient':
-          window.location.href = '/patient-dashboard';
-          break;
-        case 'doctor':
-          window.location.href = '/doctor-dashboard';
-          break;
-        case 'hospital':
-          window.location.href = '/hospital-dashboard';
-          break;
-        case 'admin':
-          window.location.href = '/admin-panel';
-          break;
-        default:
-          window.location.href = '/';
-      }
-    }, 100);
+    const currentPath = window.location.pathname;
+    const isOnAuthPage = currentPath === '/login' || currentPath === '/signup';
+    
+    if (!isOnAuthPage) {
+      console.log('Not on auth page, skipping redirect');
+      return;
+    }
+
+    const dashboardPaths = {
+      'patient': '/patient-dashboard',
+      'doctor': '/doctor-dashboard',
+      'hospital': '/hospital-dashboard',
+      'admin': '/admin-panel'
+    };
+
+    const targetPath = dashboardPaths[role as keyof typeof dashboardPaths] || '/';
+    
+    // Use replace to avoid adding to history
+    window.location.replace(targetPath);
   };
 
   useEffect(() => {
@@ -113,23 +115,23 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         setUser(session?.user ?? null);
 
         if (event === 'SIGNED_IN' && session?.user) {
-          // Defer profile fetch to prevent deadlock
-          setTimeout(async () => {
-            const profileData = await fetchProfile(session.user.id);
-            if (profileData) {
-              const currentPath = window.location.pathname;
-              const isOnAuthPage = currentPath === '/login' || currentPath === '/signup';
-              
-              if (isOnAuthPage) {
+          // Only fetch profile and redirect if we're initialized and on auth pages
+          if (isInitialized) {
+            setTimeout(async () => {
+              const profileData = await fetchProfile(session.user.id);
+              if (profileData) {
                 redirectToDashboard(profileData.role);
               }
-            }
-          }, 0);
+            }, 100);
+          }
         } else if (event === 'SIGNED_OUT') {
           setProfile(null);
         }
         
-        setLoading(false);
+        if (!isInitialized) {
+          setLoading(false);
+          setIsInitialized(true);
+        }
       }
     );
 
@@ -142,21 +144,20 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         if (session?.user) {
           setSession(session);
           setUser(session.user);
-          setTimeout(() => {
-            fetchProfile(session.user.id);
-          }, 0);
+          await fetchProfile(session.user.id);
         }
       } catch (error) {
         console.error('Error checking session:', error);
       } finally {
         setLoading(false);
+        setIsInitialized(true);
       }
     };
 
     checkSession();
 
     return () => subscription.unsubscribe();
-  }, []);
+  }, [isInitialized]);
 
   const signIn = async (email: string, password: string) => {
     try {

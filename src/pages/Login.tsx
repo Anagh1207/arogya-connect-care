@@ -1,5 +1,5 @@
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -14,7 +14,22 @@ const Login = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
   const navigate = useNavigate();
-  const { signIn } = useAuth();
+  const { signIn, user, profile, loading } = useAuth();
+
+  // Redirect if already logged in
+  useEffect(() => {
+    if (!loading && user && profile) {
+      console.log('User already logged in, redirecting to dashboard');
+      const dashboardPaths = {
+        'patient': '/patient-dashboard',
+        'doctor': '/doctor-dashboard',
+        'hospital': '/hospital-dashboard',
+        'admin': '/admin-panel'
+      };
+      const targetPath = dashboardPaths[profile.role as keyof typeof dashboardPaths] || '/';
+      navigate(targetPath, { replace: true });
+    }
+  }, [user, profile, loading, navigate]);
 
   const validateForm = () => {
     const newErrors: Record<string, string> = {};
@@ -51,6 +66,20 @@ const Login = () => {
       setIsLoading(false);
     }
   };
+
+  // Show loading if auth is initializing
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-arogya-light-blue/20 via-white to-arogya-beige-yellow/10">
+        <Card className="w-96">
+          <CardContent className="p-6 text-center">
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-arogya-dark-green mx-auto mb-4"></div>
+            <p className="text-arogya-dark-teal">Loading...</p>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-arogya-light-blue/20 via-white to-arogya-beige-yellow/10">

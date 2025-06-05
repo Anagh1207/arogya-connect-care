@@ -30,16 +30,13 @@ const ProtectedRoute = ({
     );
   }
 
-  if (!user) {
+  if (!user || !profile) {
+    console.log('No user or profile, redirecting to login');
     return <Navigate to={redirectTo} replace />;
   }
 
-  if (!profile) {
-    // If user exists but no profile, redirect to login to refetch
-    return <Navigate to="/login" replace />;
-  }
-
   if (allowedRoles && !allowedRoles.includes(profile.role)) {
+    console.log('User role not allowed, redirecting to unauthorized');
     return <Navigate to="/unauthorized" replace />;
   }
 
