@@ -1,22 +1,28 @@
-
 import { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Dialog, DialogContent } from '@/components/ui/dialog';
 import { Calendar, Clock, User, FileText, Heart, Phone, Video, MessageSquare, Star, MapPin, Plus } from 'lucide-react';
 import Header from './Header';
 import Footer from './Footer';
 import SubscriptionUpgrade from './SubscriptionUpgrade';
+import BookAppointment from './BookAppointment';
+import HealthRecordsUpload from './HealthRecordsUpload';
+import PrescriptionManagement from './PrescriptionManagement';
 import { useAuth } from '@/hooks/useAuth';
 import { usePatientData } from '@/hooks/usePatientData';
+import { useHealthRecords } from '@/hooks/useHealthRecords';
 import { format } from 'date-fns';
 import { toast } from '@/hooks/use-toast';
 
 const PatientDashboard = () => {
   const { profile } = useAuth();
-  const { appointments, prescriptions, notifications, vitals, loading, markNotificationAsRead } = usePatientData();
+  const { appointments, prescriptions, notifications, vitals, loading, markNotificationAsRead, refetch } = usePatientData();
+  const { records: healthRecords, loading: recordsLoading, refetch: refetchRecords } = useHealthRecords();
   const [showUpgrade, setShowUpgrade] = useState(true);
+  const [showBookAppointment, setShowBookAppointment] = useState(false);
 
   if (loading) {
     return (
@@ -38,9 +44,15 @@ const PatientDashboard = () => {
   const unreadNotifications = notifications.filter(n => !n.is_read);
 
   const handleBookAppointment = () => {
+    setShowBookAppointment(true);
+  };
+
+  const handleAppointmentSuccess = () => {
+    setShowBookAppointment(false);
+    refetch.appointments();
     toast({
-      title: "Book Appointment",
-      description: "Appointment booking feature will be available soon!",
+      title: "Appointment Booked",
+      description: "Your appointment has been successfully scheduled!",
     });
   };
 
@@ -51,15 +63,15 @@ const PatientDashboard = () => {
     });
   };
 
-  const handleUploadRecords = () => {
-    toast({
-      title: "Upload Records",
-      description: "Medical records upload feature will be available soon!",
-    });
-  };
-
   const handleEmergencyCall = (number: string) => {
     window.open(`tel:${number}`, '_self');
+  };
+
+  const handleRefillRequest = (prescriptionId: string) => {
+    toast({
+      title: "Refill Requested",
+      description: "Your prescription refill request has been sent to the doctor.",
+    });
   };
 
   return (
@@ -147,11 +159,11 @@ const PatientDashboard = () => {
             <CardContent className="p-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-gray-600">Emergency Contact</p>
-                  <p className="text-lg font-bold text-red-600">102</p>
-                  <p className="text-gray-500 text-sm">24/7 Available</p>
+                  <p className="text-gray-600">Health Records</p>
+                  <p className="text-2xl font-bold text-gray-900">{healthRecords.length}</p>
+                  <p className="text-arogya-dark-green text-sm">Files uploaded</p>
                 </div>
-                <Phone className="w-8 h-8 text-red-500" />
+                <FileText className="w-8 h-8 text-arogya-dark-green" />
               </div>
             </CardContent>
           </Card>
@@ -160,9 +172,9 @@ const PatientDashboard = () => {
         <Tabs defaultValue="appointments" className="space-y-6">
           <TabsList className="grid w-full grid-cols-5 lg:w-fit">
             <TabsTrigger value="appointments">Appointments</TabsTrigger>
+            <TabsTrigger value="prescriptions">Prescriptions</TabsTrigger>
             <TabsTrigger value="records">Health Records</TabsTrigger>
             <TabsTrigger value="vitals">Vitals</TabsTrigger>
-            <TabsTrigger value="prescriptions">Prescriptions</TabsTrigger>
             <TabsTrigger value="emergency">Emergency</TabsTrigger>
           </TabsList>
 
@@ -239,6 +251,20 @@ const PatientDashboard = () => {
             </Card>
           </TabsContent>
 
+          <TabsContent value="prescriptions">
+            <PrescriptionManagement 
+              prescriptions={prescriptions}
+              onRequestRefill={handleRefillRequest}
+            />
+          </TabsContent>
+
+          <TabsContent value="records">
+            <HealthRecordsUpload 
+              records={healthRecords}
+              onRecordsUpdate={refetchRecords}
+            />
+          </TabsContent>
+
           <TabsContent value="vitals">
             <Card>
               <CardHeader>
@@ -261,53 +287,6 @@ const PatientDashboard = () => {
                   <Button variant="outline" className="border-arogya-dark-green text-arogya-dark-green">
                     Update Vitals
                   </Button>
-                </div>
-              </CardContent>
-            </Card>
-          </TabsContent>
-
-          <TabsContent value="prescriptions">
-            <Card>
-              <CardHeader>
-                <CardTitle>Current Prescriptions</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-4">
-                  {prescriptions.length === 0 ? (
-                    <div className="text-center py-8">
-                      <FileText className="w-16 h-16 text-gray-400 mx-auto mb-4" />
-                      <h3 className="text-lg font-medium text-gray-900 mb-2">No Prescriptions</h3>
-                      <p className="text-gray-600">You don't have any active prescriptions.</p>
-                    </div>
-                  ) : (
-                    prescriptions.map(prescription => (
-                      <div key={prescription.id} className="p-4 border border-gray-200 rounded-lg">
-                        <div className="flex justify-between items-start">
-                          <div>
-                            <h3 className="font-semibold text-gray-900">{prescription.medication_name}</h3>
-                            <p className="text-gray-600">{prescription.dosage} - {prescription.frequency}</p>
-                            <p className="text-sm text-gray-500">
-                              Duration: {prescription.duration}
-                            </p>
-                            <p className="text-sm text-gray-500">
-                              Prescribed by {prescription.doctor.full_name} on {format(new Date(prescription.prescribed_date), 'MMM dd, yyyy')}
-                            </p>
-                            {prescription.instructions && (
-                              <p className="text-sm text-blue-600 mt-2">
-                                Instructions: {prescription.instructions}
-                              </p>
-                            )}
-                            <Badge variant={prescription.status === 'active' ? 'default' : 'secondary'} className="mt-2">
-                              {prescription.status}
-                            </Badge>
-                          </div>
-                          <Button variant="outline" size="sm">
-                            Reorder
-                          </Button>
-                        </div>
-                      </div>
-                    ))
-                  )}
                 </div>
               </CardContent>
             </Card>
@@ -392,64 +371,18 @@ const PatientDashboard = () => {
               </CardContent>
             </Card>
           </TabsContent>
-
-          <TabsContent value="records">
-            <Card>
-              <CardHeader>
-                <CardTitle>Health Records</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="text-center py-12">
-                  <FileText className="w-16 h-16 text-gray-400 mx-auto mb-4" />
-                  <h3 className="text-lg font-medium text-gray-900 mb-2">Your Health Records</h3>
-                  <p className="text-gray-600 mb-6">Upload and manage your medical documents securely</p>
-                  <Button 
-                    onClick={handleUploadRecords}
-                    className="bg-arogya-dark-green hover:bg-arogya-light-green text-white"
-                  >
-                    Upload Records
-                  </Button>
-                </div>
-                {/* Notification display */}
-                {notifications.length > 0 && (
-                  <div className="mt-8">
-                    <h4 className="font-semibold text-gray-900 mb-4">Recent Notifications</h4>
-                    <div className="space-y-3">
-                      {notifications.slice(0, 5).map(notification => (
-                        <div 
-                          key={notification.id} 
-                          className={`p-3 rounded-lg border ${
-                            notification.is_read ? 'bg-gray-50' : 'bg-blue-50 border-blue-200'
-                          }`}
-                        >
-                          <div className="flex justify-between items-start">
-                            <div>
-                              <p className="font-medium text-gray-900">{notification.title}</p>
-                              <p className="text-sm text-gray-600">{notification.message}</p>
-                              <p className="text-xs text-gray-500 mt-1">
-                                {format(new Date(notification.created_at), 'MMM dd, yyyy')}
-                              </p>
-                            </div>
-                            {!notification.is_read && (
-                              <Button 
-                                size="sm" 
-                                variant="outline"
-                                onClick={() => markNotificationAsRead(notification.id)}
-                              >
-                                Mark Read
-                              </Button>
-                            )}
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                )}
-              </CardContent>
-            </Card>
-          </TabsContent>
         </Tabs>
       </div>
+
+      {/* Book Appointment Dialog */}
+      <Dialog open={showBookAppointment} onOpenChange={setShowBookAppointment}>
+        <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+          <BookAppointment 
+            onSuccess={handleAppointmentSuccess}
+            onCancel={() => setShowBookAppointment(false)}
+          />
+        </DialogContent>
+      </Dialog>
       
       <Footer />
     </div>
