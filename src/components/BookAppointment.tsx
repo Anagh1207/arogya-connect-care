@@ -2,7 +2,6 @@
 import { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -49,25 +48,32 @@ const BookAppointment = ({ onSuccess, onCancel }: BookAppointmentProps) => {
 
   const fetchDoctors = async () => {
     try {
-      const { data, error } = await supabase
+      // First get doctors
+      const { data: doctorsData, error: doctorsError } = await supabase
         .from('doctors')
-        .select(`
-          id,
-          specialization,
-          consultation_fee,
-          profiles!inner(full_name)
-        `);
+        .select('id, specialization, consultation_fee');
 
-      if (error) throw error;
+      if (doctorsError) throw doctorsError;
 
-      const formattedDoctors = data?.map(doc => ({
-        id: doc.id,
-        full_name: doc.profiles?.full_name || 'Unknown Doctor',
-        specialization: doc.specialization,
-        consultation_fee: doc.consultation_fee || 0
-      })) || [];
+      // Then get their profiles separately
+      const doctorsWithProfiles = await Promise.all(
+        (doctorsData || []).map(async (doctor) => {
+          const { data: profile } = await supabase
+            .from('profiles')
+            .select('full_name')
+            .eq('id', doctor.id)
+            .single();
 
-      setDoctors(formattedDoctors);
+          return {
+            id: doctor.id,
+            full_name: profile?.full_name || 'Unknown Doctor',
+            specialization: doctor.specialization,
+            consultation_fee: doctor.consultation_fee || 0
+          };
+        })
+      );
+
+      setDoctors(doctorsWithProfiles);
     } catch (error: any) {
       console.error('Error fetching doctors:', error);
       toast({
@@ -201,7 +207,6 @@ const BookAppointment = ({ onSuccess, onCancel }: BookAppointmentProps) => {
                   onSelect={setDate}
                   disabled={(date) => date < new Date()}
                   initialFocus
-                  className="p-3 pointer-events-auto"
                 />
               </PopoverContent>
             </Popover>
