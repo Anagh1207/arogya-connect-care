@@ -71,6 +71,7 @@ export const usePatientData = () => {
     if (!user) return;
 
     try {
+      console.log('Fetching appointments for user:', user.id);
       const { data, error } = await supabase
         .from('appointments')
         .select(`
@@ -91,7 +92,12 @@ export const usePatientData = () => {
         .eq('patient_id', user.id)
         .order('appointment_date', { ascending: false });
 
-      if (error) throw error;
+      if (error) {
+        console.error('Error fetching appointments:', error);
+        throw error;
+      }
+
+      console.log('Raw appointments data:', data);
 
       // Fetch doctor and hospital profiles separately to avoid the relationship ambiguity
       const appointmentsWithDetails = await Promise.all((data || []).map(async (apt) => {
@@ -130,6 +136,7 @@ export const usePatientData = () => {
         };
       }));
 
+      console.log('Processed appointments:', appointmentsWithDetails);
       setAppointments(appointmentsWithDetails);
     } catch (error: any) {
       console.error('Error fetching appointments:', error);
@@ -145,6 +152,7 @@ export const usePatientData = () => {
     if (!user) return;
 
     try {
+      console.log('Fetching prescriptions for user:', user.id);
       // Direct query to prescriptions table
       const { data, error } = await supabase
         .from('prescriptions')
@@ -162,7 +170,12 @@ export const usePatientData = () => {
         .eq('patient_id', user.id)
         .order('prescribed_date', { ascending: false });
 
-      if (error) throw error;
+      if (error) {
+        console.error('Error fetching prescriptions:', error);
+        throw error;
+      }
+
+      console.log('Raw prescriptions data:', data);
 
       // Fetch doctor profiles separately
       const prescriptionsWithDetails = await Promise.all((data || []).map(async (prescription) => {
@@ -187,6 +200,7 @@ export const usePatientData = () => {
         };
       }));
 
+      console.log('Processed prescriptions:', prescriptionsWithDetails);
       setPrescriptions(prescriptionsWithDetails);
     } catch (error: any) {
       console.error('Error fetching prescriptions:', error);
@@ -202,6 +216,7 @@ export const usePatientData = () => {
     if (!user) return;
 
     try {
+      console.log('Fetching notifications for user:', user.id);
       const { data, error } = await supabase
         .from('notifications')
         .select('*')
@@ -209,10 +224,16 @@ export const usePatientData = () => {
         .order('created_at', { ascending: false })
         .limit(10);
 
-      if (error) throw error;
+      if (error) {
+        console.error('Error fetching notifications:', error);
+        throw error;
+      }
+      
+      console.log('Notifications data:', data);
       setNotifications(data || []);
     } catch (error: any) {
       console.error('Error fetching notifications:', error);
+      // Don't show error toast for notifications as they're not critical
     }
   };
 
@@ -230,13 +251,24 @@ export const usePatientData = () => {
           notif.id === notificationId ? { ...notif, is_read: true } : notif
         )
       );
+
+      toast({
+        title: "Notification marked as read",
+        description: "Notification updated successfully",
+      });
     } catch (error: any) {
       console.error('Error marking notification as read:', error);
+      toast({
+        title: "Error",
+        description: "Failed to update notification",
+        variant: "destructive",
+      });
     }
   };
 
   useEffect(() => {
     if (user && profile?.role === 'patient') {
+      console.log('Loading patient data for user:', user.email);
       const loadData = async () => {
         setLoading(true);
         await Promise.all([
@@ -248,6 +280,8 @@ export const usePatientData = () => {
       };
 
       loadData();
+    } else {
+      setLoading(false);
     }
   }, [user, profile]);
 
