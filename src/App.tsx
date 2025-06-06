@@ -11,6 +11,7 @@ import Index from "./pages/Index";
 import About from "./pages/About";
 import Login from "./pages/Login";
 import Signup from "./pages/Signup";
+import DoctorSignup from "./pages/DoctorSignup";
 import PatientDashboard from "./components/PatientDashboard";
 import DoctorDashboard from "./components/DoctorDashboard";
 import EmergencyServices from "./pages/EmergencyServices";
@@ -46,6 +47,7 @@ const App = () => (
             <Route path="/terms" element={<Terms />} />
             <Route path="/login" element={<Login />} />
             <Route path="/signup" element={<Signup />} />
+            <Route path="/doctor-signup" element={<DoctorSignup />} />
             <Route path="/unauthorized" element={<Unauthorized />} />
             <Route 
               path="/patient-dashboard" 

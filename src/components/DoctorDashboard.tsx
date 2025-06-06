@@ -1,5 +1,5 @@
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -7,14 +7,63 @@ import { Badge } from '@/components/ui/badge';
 import Header from './Header';
 import Footer from './Footer';
 import SubscriptionUpgrade from './SubscriptionUpgrade';
+import DoctorVerificationStatus from './DoctorVerificationStatus';
+import DoctorDocumentUpload from './DoctorDocumentUpload';
 import { useDoctorData } from '@/hooks/useDoctorData';
 import { useAuth } from '@/hooks/useAuth';
-import { Calendar, Users, DollarSign, Star, Clock, FileText } from 'lucide-react';
+import { Calendar, Users, DollarSign, Star, Clock, FileText, CheckCircle, XCircle, AlertCircle } from 'lucide-react';
 
 const DoctorDashboard = () => {
   const [showUpgrade, setShowUpgrade] = useState(true);
+  const [verificationStatus, setVerificationStatus] = useState<string>('');
   const { appointments, stats, loading } = useDoctorData();
-  const { profile } = useAuth();
+  const { profile, user } = useAuth();
+
+  useEffect(() => {
+    if (user) {
+      fetchVerificationStatus();
+    }
+  }, [user]);
+
+  const fetchVerificationStatus = async () => {
+    if (!user) return;
+
+    try {
+      const { data } = await supabase
+        .from('doctors')
+        .select('verification_status')
+        .eq('id', user.id)
+        .single();
+
+      if (data) {
+        setVerificationStatus(data.verification_status);
+      }
+    } catch (error) {
+      console.error('Error fetching verification status:', error);
+    }
+  };
+
+  const getVerificationIcon = (status: string) => {
+    switch (status) {
+      case 'verified':
+        return <CheckCircle className="w-5 h-5 text-green-500" />;
+      case 'rejected':
+        return <XCircle className="w-5 h-5 text-red-500" />;
+      default:
+        return <AlertCircle className="w-5 h-5 text-yellow-500" />;
+    }
+  };
+
+  const getVerificationMessage = (status: string) => {
+    switch (status) {
+      case 'verified':
+        return { text: 'Your account is verified! You can now receive appointments.', color: 'text-green-700 bg-green-50' };
+      case 'rejected':
+        return { text: 'Your verification was rejected. Please check the verification status and resubmit documents.', color: 'text-red-700 bg-red-50' };
+      default:
+        return { text: 'Your account is pending verification. Please upload your documents if you haven\'t already.', color: 'text-yellow-700 bg-yellow-50' };
+    }
+  };
 
   if (loading) {
     return (
@@ -39,6 +88,8 @@ const DoctorDashboard = () => {
     }
   };
 
+  const verificationMessage = getVerificationMessage(verificationStatus);
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-arogya-light-blue/20 via-white to-arogya-beige-yellow/10">
       <Header />
@@ -51,8 +102,18 @@ const DoctorDashboard = () => {
           <p className="text-gray-600">Manage your practice efficiently and serve patients better.</p>
         </div>
 
+        {/* Verification Status Banner */}
+        {verificationStatus && (
+          <div className={`p-4 rounded-lg mb-6 ${verificationMessage.color}`}>
+            <div className="flex items-center space-x-3">
+              {getVerificationIcon(verificationStatus)}
+              <p className="font-medium">{verificationMessage.text}</p>
+            </div>
+          </div>
+        )}
+
         {/* Subscription upgrade banner */}
-        {showUpgrade && (
+        {showUpgrade && verificationStatus === 'verified' && (
           <SubscriptionUpgrade 
             variant="banner" 
             context="ai-features"
@@ -116,8 +177,9 @@ const DoctorDashboard = () => {
         </div>
 
         <Tabs defaultValue="appointments" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-4 lg:w-fit">
+          <TabsList className="grid w-full grid-cols-5 lg:w-fit">
             <TabsTrigger value="appointments">Appointments</TabsTrigger>
+            <TabsTrigger value="verification">Verification</TabsTrigger>
             <TabsTrigger value="patients">Patients</TabsTrigger>
             <TabsTrigger value="schedule">Schedule</TabsTrigger>
             <TabsTrigger value="reports">Reports</TabsTrigger>
@@ -128,13 +190,20 @@ const DoctorDashboard = () => {
               <CardHeader>
                 <div className="flex justify-between items-center">
                   <CardTitle className="text-arogya-dark-teal">Your Appointments</CardTitle>
-                  <Button className="bg-arogya-dark-green hover:bg-arogya-light-green text-white">
-                    Schedule New Appointment
-                  </Button>
+                  {verificationStatus === 'verified' && (
+                    <Button className="bg-arogya-dark-green hover:bg-arogya-light-green text-white">
+                      Schedule New Appointment
+                    </Button>
+                  )}
                 </div>
               </CardHeader>
               <CardContent>
-                {appointments.length === 0 ? (
+                {verificationStatus !== 'verified' ? (
+                  <div className="text-center py-8">
+                    <AlertCircle className="w-16 h-16 text-yellow-500 mx-auto mb-4" />
+                    <p className="text-gray-500">Complete verification to start receiving appointments</p>
+                  </div>
+                ) : appointments.length === 0 ? (
                   <div className="text-center py-8">
                     <Calendar className="w-16 h-16 text-gray-300 mx-auto mb-4" />
                     <p className="text-gray-500">No appointments scheduled</p>
@@ -173,6 +242,15 @@ const DoctorDashboard = () => {
                 )}
               </CardContent>
             </Card>
+          </TabsContent>
+
+          <TabsContent value="verification">
+            <div className="space-y-6">
+              <DoctorVerificationStatus />
+              {verificationStatus !== 'verified' && (
+                <DoctorDocumentUpload onUploadComplete={fetchVerificationStatus} />
+              )}
+            </div>
           </TabsContent>
 
           <TabsContent value="patients">

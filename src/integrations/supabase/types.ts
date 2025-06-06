@@ -79,6 +79,50 @@ export type Database = {
           },
         ]
       }
+      doctor_documents: {
+        Row: {
+          created_at: string
+          doctor_id: string
+          document_name: string
+          document_type: string
+          document_url: string
+          file_size: number | null
+          id: string
+          updated_at: string
+          uploaded_at: string
+        }
+        Insert: {
+          created_at?: string
+          doctor_id: string
+          document_name: string
+          document_type: string
+          document_url: string
+          file_size?: number | null
+          id?: string
+          updated_at?: string
+          uploaded_at?: string
+        }
+        Update: {
+          created_at?: string
+          doctor_id?: string
+          document_name?: string
+          document_type?: string
+          document_url?: string
+          file_size?: number | null
+          id?: string
+          updated_at?: string
+          uploaded_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "doctor_documents_doctor_id_fkey"
+            columns: ["doctor_id"]
+            isOneToOne: false
+            referencedRelation: "doctors"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       doctors: {
         Row: {
           available_from: string | null
@@ -92,6 +136,10 @@ export type Database = {
           rating: number | null
           specialization: string
           total_reviews: number | null
+          verification_notes: string | null
+          verification_status: string | null
+          verified_at: string | null
+          verified_by: string | null
         }
         Insert: {
           available_from?: string | null
@@ -105,6 +153,10 @@ export type Database = {
           rating?: number | null
           specialization: string
           total_reviews?: number | null
+          verification_notes?: string | null
+          verification_status?: string | null
+          verified_at?: string | null
+          verified_by?: string | null
         }
         Update: {
           available_from?: string | null
@@ -118,6 +170,10 @@ export type Database = {
           rating?: number | null
           specialization?: string
           total_reviews?: number | null
+          verification_notes?: string | null
+          verification_status?: string | null
+          verified_at?: string | null
+          verified_by?: string | null
         }
         Relationships: [
           {
@@ -131,6 +187,13 @@ export type Database = {
             foreignKeyName: "doctors_id_fkey"
             columns: ["id"]
             isOneToOne: true
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "doctors_verified_by_fkey"
+            columns: ["verified_by"]
+            isOneToOne: false
             referencedRelation: "profiles"
             referencedColumns: ["id"]
           },

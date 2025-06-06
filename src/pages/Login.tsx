@@ -98,13 +98,22 @@ const Login = () => {
             Arogya Care
           </span>
         </div>
-        <Button 
-          variant="ghost" 
-          onClick={() => navigate('/signup')}
-          className="text-arogya-dark-green hover:bg-arogya-light-blue/50"
-        >
-          Don't have an account? Sign up
-        </Button>
+        <div className="flex space-x-4">
+          <Button 
+            variant="ghost" 
+            onClick={() => navigate('/signup')}
+            className="text-arogya-dark-green hover:bg-arogya-light-blue/50"
+          >
+            Patient Signup
+          </Button>
+          <Button 
+            variant="ghost" 
+            onClick={() => navigate('/doctor-signup')}
+            className="text-arogya-dark-green hover:bg-arogya-light-blue/50"
+          >
+            Doctor Signup
+          </Button>
+        </div>
       </div>
 
       <div className="flex items-center justify-center px-4 sm:px-6 lg:px-8 pb-12">
@@ -197,6 +206,10 @@ const Login = () => {
                   <button className="text-sm text-arogya-dark-green hover:text-arogya-light-green font-medium hover:underline">
                     Forgot your password?
                   </button>
+                </div>
+
+                <div className="mt-4 text-center text-sm text-gray-600">
+                  <p>Admin access is managed separately.</p>
                 </div>
               </CardContent>
             </Card>

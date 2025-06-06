@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -7,7 +6,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Calendar } from '@/components/ui/calendar';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import { CalendarIcon, Clock, User } from 'lucide-react';
+import { CalendarIcon, Clock, User, CheckCircle } from 'lucide-react';
 import { format } from 'date-fns';
 import { cn } from '@/lib/utils';
 import { supabase } from '@/integrations/supabase/client';
@@ -19,6 +18,7 @@ interface Doctor {
   full_name: string;
   specialization: string;
   consultation_fee: number;
+  verification_status: string;
 }
 
 interface BookAppointmentProps {
@@ -48,10 +48,11 @@ const BookAppointment = ({ onSuccess, onCancel }: BookAppointmentProps) => {
 
   const fetchDoctors = async () => {
     try {
-      // First get doctors
+      // First get verified doctors only
       const { data: doctorsData, error: doctorsError } = await supabase
         .from('doctors')
-        .select('id, specialization, consultation_fee');
+        .select('id, specialization, consultation_fee, verification_status')
+        .eq('verification_status', 'verified');
 
       if (doctorsError) throw doctorsError;
 
@@ -68,7 +69,8 @@ const BookAppointment = ({ onSuccess, onCancel }: BookAppointmentProps) => {
             id: doctor.id,
             full_name: profile?.full_name || 'Unknown Doctor',
             specialization: doctor.specialization,
-            consultation_fee: doctor.consultation_fee || 0
+            consultation_fee: doctor.consultation_fee || 0,
+            verification_status: doctor.verification_status
           };
         })
       );
@@ -163,6 +165,7 @@ const BookAppointment = ({ onSuccess, onCancel }: BookAppointmentProps) => {
     <Card className="w-full max-w-2xl mx-auto">
       <CardHeader>
         <CardTitle className="text-arogya-dark-teal">Book New Appointment</CardTitle>
+        <p className="text-sm text-gray-600">Only verified doctors are available for booking</p>
       </CardHeader>
       <CardContent className="space-y-6">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -170,19 +173,27 @@ const BookAppointment = ({ onSuccess, onCancel }: BookAppointmentProps) => {
             <Label htmlFor="doctor">Select Doctor</Label>
             <Select value={selectedDoctor} onValueChange={setSelectedDoctor}>
               <SelectTrigger>
-                <SelectValue placeholder="Choose a doctor" />
+                <SelectValue placeholder="Choose a verified doctor" />
               </SelectTrigger>
               <SelectContent>
                 {doctors.map(doctor => (
                   <SelectItem key={doctor.id} value={doctor.id}>
-                    <div className="flex flex-col">
-                      <span className="font-medium">{doctor.full_name}</span>
-                      <span className="text-sm text-gray-500">{doctor.specialization}</span>
+                    <div className="flex items-center space-x-2">
+                      <div className="flex flex-col">
+                        <div className="flex items-center space-x-2">
+                          <span className="font-medium">{doctor.full_name}</span>
+                          <CheckCircle className="w-4 h-4 text-green-500" />
+                        </div>
+                        <span className="text-sm text-gray-500">{doctor.specialization}</span>
+                      </div>
                     </div>
                   </SelectItem>
                 ))}
               </SelectContent>
             </Select>
+            {doctors.length === 0 && (
+              <p className="text-sm text-gray-500">No verified doctors available at the moment</p>
+            )}
           </div>
 
           <div className="space-y-2">
@@ -252,7 +263,11 @@ const BookAppointment = ({ onSuccess, onCancel }: BookAppointmentProps) => {
             <div className="flex items-center space-x-3">
               <User className="w-5 h-5 text-blue-600" />
               <div>
-                <p className="font-medium text-blue-900">{selectedDoctorInfo.full_name}</p>
+                <div className="flex items-center space-x-2">
+                  <p className="font-medium text-blue-900">{selectedDoctorInfo.full_name}</p>
+                  <CheckCircle className="w-4 h-4 text-green-500" />
+                  <span className="text-xs bg-green-100 text-green-800 px-2 py-1 rounded-full">Verified</span>
+                </div>
                 <p className="text-sm text-blue-700">{selectedDoctorInfo.specialization}</p>
                 <p className="text-sm text-blue-600">Consultation Fee: ₹{selectedDoctorInfo.consultation_fee}</p>
               </div>
