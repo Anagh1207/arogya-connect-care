@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -11,6 +10,7 @@ import DoctorVerificationStatus from './DoctorVerificationStatus';
 import DoctorDocumentUpload from './DoctorDocumentUpload';
 import { useDoctorData } from '@/hooks/useDoctorData';
 import { useAuth } from '@/hooks/useAuth';
+import { supabase } from '@/integrations/supabase/client';
 import { Calendar, Users, DollarSign, Star, Clock, FileText, CheckCircle, XCircle, AlertCircle } from 'lucide-react';
 
 const DoctorDashboard = () => {
