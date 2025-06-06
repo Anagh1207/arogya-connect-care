@@ -10,27 +10,20 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import SubscriptionUpgrade from './SubscriptionUpgrade';
+import { useAuth } from '@/hooks/useAuth';
 
 const Header = () => {
-  const [userType, setUserType] = useState<'patient' | 'doctor' | 'admin' | null>(null);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const navigate = useNavigate();
   const location = useLocation();
+  const { user, profile, signOut } = useAuth();
 
-  const handleLogin = (type: 'patient' | 'doctor' | 'admin') => {
-    setUserType(type);
-    if (type === 'patient') {
-      navigate('/patient-dashboard');
-    } else if (type === 'doctor') {
-      navigate('/doctor-dashboard');
-    } else {
-      navigate('/admin-panel');
+  const handleLogout = async () => {
+    try {
+      await signOut();
+    } catch (error) {
+      console.error('Logout error:', error);
     }
-  };
-
-  const handleLogout = () => {
-    setUserType(null);
-    navigate('/');
   };
 
   const navLinks = [
@@ -41,26 +34,49 @@ const Header = () => {
     { href: '/contact', label: 'Contact', icon: <MessageCircle className="w-4 h-4" /> },
   ];
 
-  const userMenuItems = {
-    patient: [
-      { label: 'Dashboard', href: '/patient-dashboard', icon: <User className="w-4 h-4" /> },
-      { label: 'Health Records', href: '/my-health-records', icon: <Stethoscope className="w-4 h-4" /> },
-      { label: 'Subscription', href: '/subscription', icon: <Heart className="w-4 h-4" /> },
-    ],
-    doctor: [
-      { label: 'Dashboard', href: '/doctor-dashboard', icon: <User className="w-4 h-4" /> },
-      { label: 'Patients', href: '/doctor-dashboard?tab=patients', icon: <Users className="w-4 h-4" /> },
-      { label: 'Schedule', href: '/doctor-dashboard?tab=schedule', icon: <Heart className="w-4 h-4" /> },
-    ],
-    admin: [
-      { label: 'Admin Panel', href: '/admin-panel', icon: <User className="w-4 h-4" /> },
-      { label: 'Emergency Services', href: '/emergency-services', icon: <Phone className="w-4 h-4" /> },
-    ]
+  const getUserMenuItems = () => {
+    if (!profile) return [];
+    
+    const baseItems = {
+      patient: [
+        { label: 'Dashboard', href: '/patient-dashboard', icon: <User className="w-4 h-4" /> },
+        { label: 'Health Records', href: '/my-health-records', icon: <Stethoscope className="w-4 h-4" /> },
+        { label: 'Subscription', href: '/subscription', icon: <Heart className="w-4 h-4" /> },
+      ],
+      doctor: [
+        { label: 'Dashboard', href: '/doctor-dashboard', icon: <User className="w-4 h-4" /> },
+        { label: 'Patients', href: '/doctor-dashboard?tab=patients', icon: <Users className="w-4 h-4" /> },
+        { label: 'Schedule', href: '/doctor-dashboard?tab=schedule', icon: <Heart className="w-4 h-4" /> },
+      ],
+      hospital: [
+        { label: 'Dashboard', href: '/hospital-dashboard', icon: <User className="w-4 h-4" /> },
+        { label: 'Management', href: '/hospital-dashboard?tab=management', icon: <Settings className="w-4 h-4" /> },
+      ],
+      admin: [
+        { label: 'Admin Panel', href: '/admin-panel', icon: <User className="w-4 h-4" /> },
+        { label: 'Emergency Services', href: '/emergency-services', icon: <Phone className="w-4 h-4" /> },
+      ]
+    };
+
+    return baseItems[profile.role] || [];
   };
 
   const isActive = (href: string) => {
     if (href === '/') return location.pathname === '/';
     return location.pathname.includes(href.replace('/#', ''));
+  };
+
+  const getWelcomeMessage = () => {
+    if (!profile) return '';
+    
+    switch (profile.role) {
+      case 'doctor':
+        return `Dr. ${profile.full_name || 'Doctor'}`;
+      case 'admin':
+        return `Admin ${profile.full_name || 'Administrator'}`;
+      default:
+        return profile.full_name || 'User';
+    }
   };
 
   return (
@@ -102,11 +118,11 @@ const Header = () => {
 
           {/* Desktop Auth/User Menu */}
           <div className="hidden md:flex items-center space-x-4">
-            {userType ? (
+            {user && profile ? (
               <div className="flex items-center space-x-3">
                 <SubscriptionUpgrade variant="badge" context="dashboard" />
                 <span className="text-sm text-arogya-dark-teal font-medium">
-                  Welcome, {userType === 'patient' ? 'John' : userType === 'doctor' ? 'Dr. Smith' : 'Admin'}
+                  Welcome, {getWelcomeMessage()}
                 </span>
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
@@ -120,7 +136,7 @@ const Header = () => {
                     </Button>
                   </DropdownMenuTrigger>
                   <DropdownMenuContent className="w-48 bg-white shadow-xl border border-arogya-light-blue/30">
-                    {userMenuItems[userType]?.map((item) => (
+                    {getUserMenuItems().map((item) => (
                       <DropdownMenuItem 
                         key={item.href}
                         onClick={() => navigate(item.href)}
@@ -195,9 +211,12 @@ const Header = () => {
               ))}
               
               <div className="pt-4 border-t border-arogya-light-blue/30 mt-4">
-                {userType ? (
+                {user && profile ? (
                   <div className="space-y-2">
-                    {userMenuItems[userType]?.map((item) => (
+                    <div className="px-4 py-2 text-sm text-arogya-dark-teal font-medium">
+                      Welcome, {getWelcomeMessage()}
+                    </div>
+                    {getUserMenuItems().map((item) => (
                       <button
                         key={item.href}
                         onClick={() => {
