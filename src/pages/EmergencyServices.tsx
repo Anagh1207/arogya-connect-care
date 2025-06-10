@@ -1,10 +1,12 @@
-
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
+import { Progress } from '@/components/ui/progress';
+import { Skeleton } from '@/components/ui/skeleton';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
+import { toast } from '@/hooks/use-toast';
 import { 
   Phone, 
   MapPin, 
@@ -32,6 +34,12 @@ import {
 const EmergencyServices = () => {
   const [emergencyType, setEmergencyType] = useState<string | null>(null);
   const [location, setLocation] = useState('');
+  const [isVideoLoading, setIsVideoLoading] = useState(false);
+  const [isChatLoading, setIsChatLoading] = useState(false);
+  const [isLocationLoading, setIsLocationLoading] = useState(false);
+  const [videoConnected, setVideoConnected] = useState(false);
+  const [chatConnected, setChatConnected] = useState(false);
+  const [locationDetected, setLocationDetected] = useState(false);
 
   const emergencyTypes = [
     {
@@ -147,6 +155,137 @@ const EmergencyServices = () => {
     ]
   };
 
+  const handleVideoConsult = async () => {
+    setIsVideoLoading(true);
+    toast({
+      title: "Connecting...",
+      description: "Searching for available emergency doctors",
+    });
+
+    try {
+      // Simulate connection process
+      await new Promise(resolve => setTimeout(resolve, 3000));
+      
+      setVideoConnected(true);
+      setIsVideoLoading(false);
+      
+      toast({
+        title: "Connected!",
+        description: "You are now connected to Dr. Sarah Johnson - Emergency Medicine",
+      });
+    } catch (error) {
+      setIsVideoLoading(false);
+      toast({
+        title: "Connection Failed",
+        description: "Unable to connect to video consultation. Please try again.",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const handleEmergencyChat = async () => {
+    setIsChatLoading(true);
+    toast({
+      title: "Connecting to Chat...",
+      description: "Finding available emergency support",
+    });
+
+    try {
+      // Simulate connection process
+      await new Promise(resolve => setTimeout(resolve, 2000));
+      
+      setChatConnected(true);
+      setIsChatLoading(false);
+      
+      toast({
+        title: "Chat Connected!",
+        description: "Emergency support specialist is ready to help you",
+      });
+    } catch (error) {
+      setIsChatLoading(false);
+      toast({
+        title: "Connection Failed",
+        description: "Unable to connect to emergency chat. Please try again.",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const handleLocationDetection = async () => {
+    setIsLocationLoading(true);
+    toast({
+      title: "Detecting Location...",
+      description: "Accessing your current location",
+    });
+
+    try {
+      // Use browser geolocation API
+      const position = await new Promise<GeolocationPosition>((resolve, reject) => {
+        navigator.geolocation.getCurrentPosition(resolve, reject, {
+          enableHighAccuracy: true,
+          timeout: 10000,
+          maximumAge: 60000
+        });
+      });
+
+      // Simulate reverse geocoding
+      await new Promise(resolve => setTimeout(resolve, 1500));
+      
+      const mockAddress = "123 Main Street, Downtown, City Center, 12345";
+      setLocation(mockAddress);
+      setLocationDetected(true);
+      setIsLocationLoading(false);
+      
+      toast({
+        title: "Location Detected!",
+        description: `Your location: ${mockAddress}`,
+      });
+    } catch (error) {
+      setIsLocationLoading(false);
+      toast({
+        title: "Location Error",
+        description: "Unable to detect location. Please enter manually.",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const handleCall911 = () => {
+    toast({
+      title: "Calling 911",
+      description: "Emergency services have been contacted",
+    });
+    // In a real app, this would trigger actual call functionality
+    window.open('tel:911');
+  };
+
+  const handleEmergencyTypeSelect = (typeId: string) => {
+    setEmergencyType(typeId);
+    const selectedType = emergencyTypes.find(t => t.id === typeId);
+    toast({
+      title: "Emergency Type Selected",
+      description: `${selectedType?.title} - Response time: ${selectedType?.responseTime}`,
+    });
+  };
+
+  const handleFacilityAction = (facility: any, action: 'directions' | 'call') => {
+    if (action === 'directions') {
+      toast({
+        title: "Opening Directions",
+        description: `Navigation to ${facility.name}`,
+      });
+      // In a real app, this would open Google Maps or similar
+      window.open(`https://maps.google.com/maps?q=${encodeURIComponent(facility.name)}`);
+    } else if (action === 'call') {
+      toast({
+        title: "Calling Hospital",
+        description: `Connecting to ${facility.name}`,
+      });
+      // In a real app, this would initiate a call
+      window.open(`tel:+1234567890`);
+    }
+  };
+
   const getUrgencyColor = (urgency: string) => {
     switch (urgency) {
       case 'Critical': return 'bg-red-100 text-red-800 border-red-300';
@@ -182,28 +321,82 @@ const EmergencyServices = () => {
           <div className="flex flex-col sm:flex-row gap-4 justify-center mb-12">
             <Button 
               size="lg"
+              onClick={handleCall911}
               className="bg-red-600 hover:bg-red-700 text-white px-8 py-4 text-lg font-bold shadow-2xl hover:shadow-3xl transform hover:scale-105 transition-all duration-300"
             >
               <Phone className="w-6 h-6 mr-3" />
               CALL 911 NOW
             </Button>
+            
             <Button 
               size="lg"
               variant="outline"
+              onClick={handleVideoConsult}
+              disabled={isVideoLoading}
               className="border-2 border-red-600 text-red-600 hover:bg-red-50 px-8 py-4 text-lg font-bold shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-300"
             >
-              <Video className="w-6 h-6 mr-3" />
-              Video Emergency Consult
+              {isVideoLoading ? (
+                <>
+                  <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-red-600 mr-3"></div>
+                  Connecting...
+                </>
+              ) : videoConnected ? (
+                <>
+                  <Video className="w-6 h-6 mr-3" />
+                  Video Connected
+                </>
+              ) : (
+                <>
+                  <Video className="w-6 h-6 mr-3" />
+                  Video Emergency Consult
+                </>
+              )}
             </Button>
+            
             <Button 
               size="lg"
               variant="outline"
+              onClick={handleEmergencyChat}
+              disabled={isChatLoading}
               className="border-2 border-blue-600 text-blue-600 hover:bg-blue-50 px-8 py-4 text-lg font-bold shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-300"
             >
-              <MessageCircle className="w-6 h-6 mr-3" />
-              Emergency Chat
+              {isChatLoading ? (
+                <>
+                  <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-600 mr-3"></div>
+                  Connecting...
+                </>
+              ) : chatConnected ? (
+                <>
+                  <MessageCircle className="w-6 h-6 mr-3" />
+                  Chat Connected
+                </>
+              ) : (
+                <>
+                  <MessageCircle className="w-6 h-6 mr-3" />
+                  Emergency Chat
+                </>
+              )}
             </Button>
           </div>
+
+          {/* Connection Status */}
+          {(isVideoLoading || isChatLoading) && (
+            <div className="mb-8">
+              <Card className="bg-blue-50 border-blue-200">
+                <CardContent className="p-4">
+                  <div className="flex items-center justify-center space-x-4">
+                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+                    <div>
+                      <h3 className="font-semibold text-blue-800">
+                        {isVideoLoading ? 'Connecting to Video Consultation...' : 'Connecting to Emergency Chat...'}
+                      </h3>
+                      <Progress value={66} className="w-64 mt-2" />
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+          )}
         </div>
 
         {/* Emergency Types Grid */}
@@ -218,7 +411,7 @@ const EmergencyServices = () => {
                     ? 'border-red-500 shadow-xl scale-105' 
                     : 'border-gray-200 hover:border-red-300'
                 }`}
-                onClick={() => setEmergencyType(type.id)}
+                onClick={() => handleEmergencyTypeSelect(type.id)}
               >
                 <CardContent className="p-6">
                   <div className="text-center">
@@ -265,9 +458,28 @@ const EmergencyServices = () => {
                   className="w-full pl-12 pr-4 py-3 border-2 border-gray-300 rounded-xl text-lg focus:ring-2 focus:ring-red-500 focus:border-transparent"
                 />
               </div>
-              <Button className="w-full bg-blue-600 hover:bg-blue-700 text-white py-3 text-lg font-semibold">
-                <Navigation className="w-5 h-5 mr-2" />
-                Use Current Location
+              
+              <Button 
+                onClick={handleLocationDetection}
+                disabled={isLocationLoading}
+                className="w-full bg-blue-600 hover:bg-blue-700 text-white py-3 text-lg font-semibold"
+              >
+                {isLocationLoading ? (
+                  <>
+                    <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white mr-2"></div>
+                    Detecting Location...
+                  </>
+                ) : locationDetected ? (
+                  <>
+                    <UserCheck className="w-5 h-5 mr-2" />
+                    Location Detected
+                  </>
+                ) : (
+                  <>
+                    <Navigation className="w-5 h-5 mr-2" />
+                    Use Current Location
+                  </>
+                )}
               </Button>
               
               <div className="mt-6 p-4 bg-green-50 rounded-xl border border-green-200">
@@ -357,11 +569,20 @@ const EmergencyServices = () => {
                   </div>
                   
                   <div className="flex space-x-2">
-                    <Button size="sm" className="flex-1 bg-blue-600 hover:bg-blue-700 text-white">
+                    <Button 
+                      size="sm" 
+                      onClick={() => handleFacilityAction(facility, 'directions')}
+                      className="flex-1 bg-blue-600 hover:bg-blue-700 text-white"
+                    >
                       <Navigation className="w-4 h-4 mr-1" />
                       Directions
                     </Button>
-                    <Button size="sm" variant="outline" className="flex-1">
+                    <Button 
+                      size="sm" 
+                      variant="outline" 
+                      onClick={() => handleFacilityAction(facility, 'call')}
+                      className="flex-1"
+                    >
                       <Phone className="w-4 h-4 mr-1" />
                       Call
                     </Button>
