@@ -120,6 +120,11 @@ const BloodAvailability = () => {
     'O-': ['O-']
   };
 
+  // Helper function to validate blood group
+  const isValidBloodGroup = (bloodGroup: string | null): bloodGroup is BloodGroup => {
+    return bloodGroup !== null && bloodGroups.includes(bloodGroup as BloodGroup);
+  };
+
   useEffect(() => {
     fetchBloodRequests();
   }, []);
@@ -162,10 +167,18 @@ const BloodAvailability = () => {
         return;
       }
 
-      setPatientData(patient);
-      if (patient.blood_group) {
-        setSelectedBloodGroup(patient.blood_group);
-        await fetchCompatibleDonors(patient.blood_group);
+      // Type-safe patient data conversion
+      const typedPatient: Patient = {
+        id: patient.id,
+        blood_group: isValidBloodGroup(patient.blood_group) ? patient.blood_group as BloodGroup : null,
+        donor_consent: patient.donor_consent,
+        profiles: patient.profiles
+      };
+
+      setPatientData(typedPatient);
+      if (typedPatient.blood_group) {
+        setSelectedBloodGroup(typedPatient.blood_group);
+        await fetchCompatibleDonors(typedPatient.blood_group);
       }
 
       toast({
@@ -489,7 +502,7 @@ const BloodAvailability = () => {
                       value={selectedBloodGroup} 
                       onValueChange={(value) => {
                         setSelectedBloodGroup(value as BloodGroup);
-                        if (value) fetchCompatibleDonors(value as BloodGroup);
+                        if (value && isValidBloodGroup(value)) fetchCompatibleDonors(value as BloodGroup);
                       }}
                     >
                       <SelectTrigger>
