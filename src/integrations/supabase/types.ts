@@ -79,6 +79,148 @@ export type Database = {
           },
         ]
       }
+      blood_donors: {
+        Row: {
+          address: string | null
+          blood_group: Database["public"]["Enums"]["blood_group"]
+          city: string
+          consent_given: boolean | null
+          contact_phone: string | null
+          created_at: string | null
+          donor_name: string
+          donor_type: Database["public"]["Enums"]["donor_type"]
+          id: string
+          is_available: boolean | null
+          last_donation_date: string | null
+          latitude: number | null
+          longitude: number | null
+          patient_id: string | null
+          pincode: string
+          state: string
+          updated_at: string | null
+        }
+        Insert: {
+          address?: string | null
+          blood_group: Database["public"]["Enums"]["blood_group"]
+          city: string
+          consent_given?: boolean | null
+          contact_phone?: string | null
+          created_at?: string | null
+          donor_name: string
+          donor_type?: Database["public"]["Enums"]["donor_type"]
+          id?: string
+          is_available?: boolean | null
+          last_donation_date?: string | null
+          latitude?: number | null
+          longitude?: number | null
+          patient_id?: string | null
+          pincode: string
+          state: string
+          updated_at?: string | null
+        }
+        Update: {
+          address?: string | null
+          blood_group?: Database["public"]["Enums"]["blood_group"]
+          city?: string
+          consent_given?: boolean | null
+          contact_phone?: string | null
+          created_at?: string | null
+          donor_name?: string
+          donor_type?: Database["public"]["Enums"]["donor_type"]
+          id?: string
+          is_available?: boolean | null
+          last_donation_date?: string | null
+          latitude?: number | null
+          longitude?: number | null
+          patient_id?: string | null
+          pincode?: string
+          state?: string
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "blood_donors_patient_id_fkey"
+            columns: ["patient_id"]
+            isOneToOne: false
+            referencedRelation: "patients"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      blood_requests: {
+        Row: {
+          address: string
+          blood_group: Database["public"]["Enums"]["blood_group"]
+          city: string
+          contact_person: string
+          contact_phone: string
+          created_at: string | null
+          hospital_name: string | null
+          id: string
+          latitude: number | null
+          longitude: number | null
+          notes: string | null
+          patient_id: string
+          pincode: string
+          requested_by: string | null
+          state: string
+          status: string | null
+          units_needed: number
+          updated_at: string | null
+          urgency_level: string
+        }
+        Insert: {
+          address: string
+          blood_group: Database["public"]["Enums"]["blood_group"]
+          city: string
+          contact_person: string
+          contact_phone: string
+          created_at?: string | null
+          hospital_name?: string | null
+          id?: string
+          latitude?: number | null
+          longitude?: number | null
+          notes?: string | null
+          patient_id: string
+          pincode: string
+          requested_by?: string | null
+          state: string
+          status?: string | null
+          units_needed?: number
+          updated_at?: string | null
+          urgency_level?: string
+        }
+        Update: {
+          address?: string
+          blood_group?: Database["public"]["Enums"]["blood_group"]
+          city?: string
+          contact_person?: string
+          contact_phone?: string
+          created_at?: string | null
+          hospital_name?: string | null
+          id?: string
+          latitude?: number | null
+          longitude?: number | null
+          notes?: string | null
+          patient_id?: string
+          pincode?: string
+          requested_by?: string | null
+          state?: string
+          status?: string | null
+          units_needed?: number
+          updated_at?: string | null
+          urgency_level?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "blood_requests_patient_id_fkey"
+            columns: ["patient_id"]
+            isOneToOne: false
+            referencedRelation: "patients"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       doctor_documents: {
         Row: {
           created_at: string
@@ -387,6 +529,7 @@ export type Database = {
           address: string | null
           blood_group: string | null
           date_of_birth: string | null
+          donor_consent: boolean | null
           emergency_contact_name: string | null
           emergency_contact_phone: string | null
           gender: string | null
@@ -397,6 +540,7 @@ export type Database = {
           address?: string | null
           blood_group?: string | null
           date_of_birth?: string | null
+          donor_consent?: boolean | null
           emergency_contact_name?: string | null
           emergency_contact_phone?: string | null
           gender?: string | null
@@ -407,6 +551,7 @@ export type Database = {
           address?: string | null
           blood_group?: string | null
           date_of_birth?: string | null
+          donor_consent?: boolean | null
           emergency_contact_name?: string | null
           emergency_contact_phone?: string | null
           gender?: string | null
@@ -532,6 +677,8 @@ export type Database = {
     Enums: {
       ambulance_status: "available" | "dispatched" | "busy" | "maintenance"
       appointment_status: "scheduled" | "completed" | "cancelled" | "no_show"
+      blood_group: "A+" | "A-" | "B+" | "B-" | "AB+" | "AB-" | "O+" | "O-"
+      donor_type: "individual" | "blood_bank"
       prescription_status: "active" | "completed" | "discontinued"
       user_role: "patient" | "doctor" | "hospital" | "admin"
     }
@@ -651,6 +798,8 @@ export const Constants = {
     Enums: {
       ambulance_status: ["available", "dispatched", "busy", "maintenance"],
       appointment_status: ["scheduled", "completed", "cancelled", "no_show"],
+      blood_group: ["A+", "A-", "B+", "B-", "AB+", "AB-", "O+", "O-"],
+      donor_type: ["individual", "blood_bank"],
       prescription_status: ["active", "completed", "discontinued"],
       user_role: ["patient", "doctor", "hospital", "admin"],
     },
