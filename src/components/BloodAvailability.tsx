@@ -4,42 +4,90 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
+import { Separator } from '@/components/ui/separator';
 import { supabase } from '@/integrations/supabase/client';
-import { useAuth } from '@/hooks/useAuth';
 import { toast } from '@/hooks/use-toast';
 import { 
   Droplets, 
   MapPin, 
   Phone, 
   Clock, 
-  User, 
-  Building2,
+  Users, 
+  Heart,
   Search,
   Plus,
-  Heart,
-  UserPlus,
-  AlertTriangle
+  AlertCircle,
+  CheckCircle,
+  User,
+  Building2,
+  Calendar
 } from 'lucide-react';
 
-const BloodAvailability = () => {
-  const { user, profile } = useAuth();
-  const [activeTab, setActiveTab] = useState('request');
-  const [bloodDonors, setBloodDonors] = useState([]);
-  const [bloodRequests, setBloodRequests] = useState([]);
-  const [patientBloodGroup, setPatientBloodGroup] = useState('');
-  const [patientId, setPatientId] = useState('');
-  const [isLoading, setIsLoading] = useState(false);
-  const [donorConsent, setDonorConsent] = useState(false);
+// Define blood group type
+type BloodGroup = 'A+' | 'A-' | 'B+' | 'B-' | 'AB+' | 'AB-' | 'O+' | 'O-';
 
-  // Blood request form state
+interface Patient {
+  id: string;
+  blood_group: BloodGroup | null;
+  donor_consent: boolean;
+  profiles: {
+    full_name: string;
+    phone: string;
+  };
+}
+
+interface BloodDonor {
+  id: string;
+  donor_name: string;
+  donor_type: 'individual' | 'blood_bank';
+  blood_group: BloodGroup;
+  contact_phone: string | null;
+  address: string | null;
+  city: string;
+  state: string;
+  pincode: string;
+  is_available: boolean;
+  last_donation_date: string | null;
+  consent_given: boolean;
+}
+
+interface BloodRequest {
+  id: string;
+  blood_group: BloodGroup;
+  units_needed: number;
+  urgency_level: string;
+  hospital_name: string | null;
+  contact_person: string;
+  contact_phone: string;
+  address: string;
+  city: string;
+  state: string;
+  pincode: string;
+  status: string;
+  notes: string | null;
+  created_at: string;
+}
+
+const BloodAvailability = () => {
+  const [activeSection, setActiveSection] = useState('search');
+  const [patientId, setPatientId] = useState('');
+  const [patientData, setPatientData] = useState<Patient | null>(null);
+  const [donorData, setDonorData] = useState<BloodDonor[]>([]);
+  const [bloodRequests, setBloodRequests] = useState<BloodRequest[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
+  const [selectedBloodGroup, setSelectedBloodGroup] = useState<BloodGroup | ''>('');
+
+  // Form states
   const [requestForm, setRequestForm] = useState({
-    unitsNeeded: 1,
-    urgencyLevel: 'high',
-    hospitalName: '',
-    contactPerson: '',
-    contactPhone: '',
+    blood_group: '' as BloodGroup | '',
+    units_needed: 1,
+    urgency_level: 'high',
+    hospital_name: '',
+    contact_person: '',
+    contact_phone: '',
     address: '',
     city: '',
     state: '',
@@ -47,94 +95,34 @@ const BloodAvailability = () => {
     notes: ''
   });
 
-  // Donor registration form state
   const [donorForm, setDonorForm] = useState({
-    donorName: '',
-    donorType: 'individual',
-    contactPhone: '',
+    donor_name: '',
+    donor_type: 'individual' as 'individual' | 'blood_bank',
+    blood_group: '' as BloodGroup | '',
+    contact_phone: '',
     address: '',
     city: '',
     state: '',
-    pincode: ''
+    pincode: '',
+    consent_given: false
   });
 
-  const bloodGroups = ['A+', 'A-', 'B+', 'B-', 'AB+', 'AB-', 'O+', 'O-'];
-  const urgencyLevels = [
-    { value: 'critical', label: 'Critical', color: 'bg-red-100 text-red-800' },
-    { value: 'high', label: 'High', color: 'bg-orange-100 text-orange-800' },
-    { value: 'medium', label: 'Medium', color: 'bg-yellow-100 text-yellow-800' },
-    { value: 'low', label: 'Low', color: 'bg-green-100 text-green-800' }
-  ];
+  const bloodGroups: BloodGroup[] = ['A+', 'A-', 'B+', 'B-', 'AB+', 'AB-', 'O+', 'O-'];
+
+  const compatibilityMap: Record<BloodGroup, BloodGroup[]> = {
+    'A+': ['A+', 'A-', 'O+', 'O-'],
+    'A-': ['A-', 'O-'],
+    'B+': ['B+', 'B-', 'O+', 'O-'],
+    'B-': ['B-', 'O-'],
+    'AB+': ['A+', 'A-', 'B+', 'B-', 'AB+', 'AB-', 'O+', 'O-'],
+    'AB-': ['A-', 'B-', 'AB-', 'O-'],
+    'O+': ['O+', 'O-'],
+    'O-': ['O-']
+  };
 
   useEffect(() => {
-    fetchBloodDonors();
     fetchBloodRequests();
-    if (user && profile?.role === 'patient') {
-      fetchPatientBloodGroup();
-    }
-  }, [user, profile]);
-
-  const fetchPatientBloodGroup = async () => {
-    if (!user) return;
-    
-    try {
-      const { data, error } = await supabase
-        .from('patients')
-        .select('blood_group, donor_consent')
-        .eq('id', user.id)
-        .single();
-
-      if (error) throw error;
-      
-      if (data) {
-        setPatientBloodGroup(data.blood_group || '');
-        setDonorConsent(data.donor_consent || false);
-      }
-    } catch (error) {
-      console.error('Error fetching patient blood group:', error);
-    }
-  };
-
-  const fetchBloodDonors = async () => {
-    try {
-      const { data, error } = await supabase
-        .from('blood_donors')
-        .select('*')
-        .eq('is_available', true)
-        .eq('consent_given', true)
-        .order('created_at', { ascending: false });
-
-      if (error) throw error;
-      setBloodDonors(data || []);
-    } catch (error) {
-      console.error('Error fetching blood donors:', error);
-      toast({
-        title: "Error",
-        description: "Failed to fetch blood donors",
-        variant: "destructive",
-      });
-    }
-  };
-
-  const fetchBloodRequests = async () => {
-    try {
-      const { data, error } = await supabase
-        .from('blood_requests')
-        .select('*')
-        .eq('status', 'active')
-        .order('created_at', { ascending: false });
-
-      if (error) throw error;
-      setBloodRequests(data || []);
-    } catch (error) {
-      console.error('Error fetching blood requests:', error);
-      toast({
-        title: "Error",
-        description: "Failed to fetch blood requests",
-        variant: "destructive",
-      });
-    }
-  };
+  }, []);
 
   const handlePatientIdLookup = async () => {
     if (!patientId.trim()) {
@@ -148,32 +136,47 @@ const BloodAvailability = () => {
 
     setIsLoading(true);
     try {
-      const { data, error } = await supabase
+      console.log('Looking up patient:', patientId);
+      
+      const { data: patient, error } = await supabase
         .from('patients')
-        .select('blood_group')
+        .select(`
+          id,
+          blood_group,
+          donor_consent,
+          profiles!inner (
+            full_name,
+            phone
+          )
+        `)
         .eq('id', patientId)
         .single();
 
-      if (error) throw error;
-      
-      if (data?.blood_group) {
-        setPatientBloodGroup(data.blood_group);
+      if (error) {
+        console.error('Error fetching patient:', error);
         toast({
-          title: "Success",
-          description: `Patient blood group found: ${data.blood_group}`,
-        });
-      } else {
-        toast({
-          title: "Warning",
-          description: "Patient found but blood group not set",
+          title: "Patient Not Found",
+          description: "Unable to find patient with the provided ID",
           variant: "destructive",
         });
+        return;
       }
+
+      setPatientData(patient);
+      if (patient.blood_group) {
+        setSelectedBloodGroup(patient.blood_group);
+        await fetchCompatibleDonors(patient.blood_group);
+      }
+
+      toast({
+        title: "Patient Found",
+        description: `Found patient: ${patient.profiles.full_name}`,
+      });
     } catch (error) {
-      console.error('Error fetching patient:', error);
+      console.error('Error:', error);
       toast({
         title: "Error",
-        description: "Patient not found or error occurred",
+        description: "An error occurred while fetching patient data",
         variant: "destructive",
       });
     } finally {
@@ -181,19 +184,51 @@ const BloodAvailability = () => {
     }
   };
 
-  const handleBloodRequest = async () => {
-    if (!patientBloodGroup) {
-      toast({
-        title: "Error",
-        description: "Please select or fetch patient blood group first",
-        variant: "destructive",
-      });
-      return;
-    }
+  const fetchCompatibleDonors = async (bloodGroup: BloodGroup) => {
+    const compatibleTypes = compatibilityMap[bloodGroup] || [];
+    
+    try {
+      const { data: donors, error } = await supabase
+        .from('blood_donors')
+        .select('*')
+        .in('blood_group', compatibleTypes)
+        .eq('is_available', true)
+        .eq('consent_given', true);
 
-    if (!requestForm.contactPerson || !requestForm.contactPhone || !requestForm.address) {
+      if (error) {
+        console.error('Error fetching donors:', error);
+        return;
+      }
+
+      setDonorData(donors || []);
+    } catch (error) {
+      console.error('Error:', error);
+    }
+  };
+
+  const fetchBloodRequests = async () => {
+    try {
+      const { data: requests, error } = await supabase
+        .from('blood_requests')
+        .select('*')
+        .eq('status', 'active')
+        .order('created_at', { ascending: false });
+
+      if (error) {
+        console.error('Error fetching blood requests:', error);
+        return;
+      }
+
+      setBloodRequests(requests || []);
+    } catch (error) {
+      console.error('Error:', error);
+    }
+  };
+
+  const handleSubmitRequest = async () => {
+    if (!requestForm.blood_group || !requestForm.contact_person || !requestForm.contact_phone) {
       toast({
-        title: "Error",
+        title: "Missing Information",
         description: "Please fill in all required fields",
         variant: "destructive",
       });
@@ -202,38 +237,40 @@ const BloodAvailability = () => {
 
     setIsLoading(true);
     try {
+      const requestData = {
+        ...requestForm,
+        blood_group: requestForm.blood_group as BloodGroup,
+        patient_id: patientData?.id || null,
+        requested_by: (await supabase.auth.getUser()).data.user?.id || null
+      };
+
       const { error } = await supabase
         .from('blood_requests')
-        .insert({
-          patient_id: patientId || user?.id,
-          blood_group: patientBloodGroup,
-          units_needed: requestForm.unitsNeeded,
-          urgency_level: requestForm.urgencyLevel,
-          hospital_name: requestForm.hospitalName,
-          contact_person: requestForm.contactPerson,
-          contact_phone: requestForm.contactPhone,
-          address: requestForm.address,
-          city: requestForm.city,
-          state: requestForm.state,
-          pincode: requestForm.pincode,
-          notes: requestForm.notes,
-          requested_by: user?.id
-        });
+        .insert([requestData]);
 
-      if (error) throw error;
+      if (error) {
+        console.error('Error submitting request:', error);
+        toast({
+          title: "Error",
+          description: "Failed to submit blood request",
+          variant: "destructive",
+        });
+        return;
+      }
 
       toast({
-        title: "Success",
-        description: "Blood request submitted successfully!",
+        title: "Request Submitted",
+        description: "Your blood request has been submitted successfully",
       });
 
       // Reset form
       setRequestForm({
-        unitsNeeded: 1,
-        urgencyLevel: 'high',
-        hospitalName: '',
-        contactPerson: '',
-        contactPhone: '',
+        blood_group: '',
+        units_needed: 1,
+        urgency_level: 'high',
+        hospital_name: '',
+        contact_person: '',
+        contact_phone: '',
         address: '',
         city: '',
         state: '',
@@ -241,12 +278,13 @@ const BloodAvailability = () => {
         notes: ''
       });
 
-      fetchBloodRequests();
+      // Refresh requests
+      await fetchBloodRequests();
     } catch (error) {
-      console.error('Error submitting blood request:', error);
+      console.error('Error:', error);
       toast({
         title: "Error",
-        description: "Failed to submit blood request",
+        description: "An error occurred while submitting the request",
         variant: "destructive",
       });
     } finally {
@@ -255,18 +293,9 @@ const BloodAvailability = () => {
   };
 
   const handleDonorRegistration = async () => {
-    if (!patientBloodGroup) {
+    if (!donorForm.donor_name || !donorForm.blood_group || !donorForm.city) {
       toast({
-        title: "Error",
-        description: "Please set your blood group first",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    if (!donorForm.donorName || !donorForm.city || !donorForm.state || !donorForm.pincode) {
-      toast({
-        title: "Error",
+        title: "Missing Information",
         description: "Please fill in all required fields",
         variant: "destructive",
       });
@@ -275,45 +304,48 @@ const BloodAvailability = () => {
 
     setIsLoading(true);
     try {
+      const donorData = {
+        ...donorForm,
+        blood_group: donorForm.blood_group as BloodGroup,
+        patient_id: patientData?.id || null
+      };
+
       const { error } = await supabase
         .from('blood_donors')
-        .insert({
-          donor_name: donorForm.donorName,
-          donor_type: donorForm.donorType,
-          blood_group: patientBloodGroup,
-          contact_phone: donorForm.contactPhone,
-          address: donorForm.address,
-          city: donorForm.city,
-          state: donorForm.state,
-          pincode: donorForm.pincode,
-          consent_given: true,
-          patient_id: user?.id
-        });
+        .insert([donorData]);
 
-      if (error) throw error;
+      if (error) {
+        console.error('Error registering donor:', error);
+        toast({
+          title: "Error",
+          description: "Failed to register as donor",
+          variant: "destructive",
+        });
+        return;
+      }
 
       toast({
-        title: "Success",
-        description: "Thank you for registering as a blood donor!",
+        title: "Registration Successful",
+        description: "You have been registered as a blood donor",
       });
 
       // Reset form
       setDonorForm({
-        donorName: '',
-        donorType: 'individual',
-        contactPhone: '',
+        donor_name: '',
+        donor_type: 'individual',
+        blood_group: '',
+        contact_phone: '',
         address: '',
         city: '',
         state: '',
-        pincode: ''
+        pincode: '',
+        consent_given: false
       });
-
-      fetchBloodDonors();
     } catch (error) {
-      console.error('Error registering donor:', error);
+      console.error('Error:', error);
       toast({
         title: "Error",
-        description: "Failed to register as donor",
+        description: "An error occurred during registration",
         variant: "destructive",
       });
     } finally {
@@ -321,317 +353,378 @@ const BloodAvailability = () => {
     }
   };
 
-  const handleUpdateBloodGroup = async (bloodGroup: string) => {
-    if (!user) return;
-
-    try {
-      const { error } = await supabase
-        .from('patients')
-        .update({ blood_group: bloodGroup })
-        .eq('id', user.id);
-
-      if (error) throw error;
-
-      setPatientBloodGroup(bloodGroup);
-      toast({
-        title: "Success",
-        description: "Blood group updated successfully!",
-      });
-    } catch (error) {
-      console.error('Error updating blood group:', error);
-      toast({
-        title: "Error",
-        description: "Failed to update blood group",
-        variant: "destructive",
-      });
-    }
-  };
-
-  const handleDonorConsentToggle = async () => {
-    if (!user) return;
-
-    try {
-      const newConsent = !donorConsent;
-      const { error } = await supabase
-        .from('patients')
-        .update({ donor_consent: newConsent })
-        .eq('id', user.id);
-
-      if (error) throw error;
-
-      setDonorConsent(newConsent);
-      toast({
-        title: "Success",
-        description: newConsent ? "Thank you for consenting to donate blood!" : "Donor consent removed",
-      });
-    } catch (error) {
-      console.error('Error updating donor consent:', error);
-      toast({
-        title: "Error",
-        description: "Failed to update donor consent",
-        variant: "destructive",
-      });
-    }
-  };
-
   const getUrgencyColor = (urgency: string) => {
-    const level = urgencyLevels.find(l => l.value === urgency);
-    return level?.color || 'bg-gray-100 text-gray-800';
-  };
-
-  const getDonorTypeIcon = (type: string) => {
-    return type === 'blood_bank' ? <Building2 className="w-4 h-4" /> : <User className="w-4 h-4" />;
-  };
-
-  const getCompatibleBloodGroups = (requestedGroup: string) => {
-    const compatibility = {
-      'A+': ['A+', 'A-', 'O+', 'O-'],
-      'A-': ['A-', 'O-'],
-      'B+': ['B+', 'B-', 'O+', 'O-'],
-      'B-': ['B-', 'O-'],
-      'AB+': ['A+', 'A-', 'B+', 'B-', 'AB+', 'AB-', 'O+', 'O-'],
-      'AB-': ['A-', 'B-', 'AB-', 'O-'],
-      'O+': ['O+', 'O-'],
-      'O-': ['O-']
-    };
-    return compatibility[requestedGroup] || [];
+    switch (urgency) {
+      case 'critical': return 'bg-red-100 text-red-800 border-red-300';
+      case 'high': return 'bg-orange-100 text-orange-800 border-orange-300';
+      case 'medium': return 'bg-yellow-100 text-yellow-800 border-yellow-300';
+      default: return 'bg-green-100 text-green-800 border-green-300';
+    }
   };
 
   return (
     <div className="space-y-8">
       {/* Header */}
       <div className="text-center">
-        <div className="inline-flex items-center bg-red-100 text-red-800 px-6 py-3 rounded-full text-lg font-bold mb-4">
-          <Droplets className="w-6 h-6 mr-2" />
-          BLOOD AVAILABILITY SYSTEM
-        </div>
-        <h2 className="text-3xl font-bold text-gray-900 mb-4">Emergency Blood Services</h2>
-        <p className="text-gray-600 max-w-2xl mx-auto">
-          Find blood donors quickly or register as a donor to help save lives in emergency situations.
+        <h2 className="text-3xl font-bold text-gray-900 mb-4">Blood Availability System</h2>
+        <p className="text-lg text-gray-600 max-w-3xl mx-auto">
+          Connect blood donors with patients in need. Search for compatible donors, 
+          submit blood requests, and register as a donor to save lives.
         </p>
       </div>
 
-      {/* Tab Navigation */}
-      <div className="flex justify-center mb-8">
+      {/* Navigation Tabs */}
+      <div className="flex justify-center">
         <div className="bg-white rounded-lg shadow-lg p-2 flex space-x-2">
           <Button
-            onClick={() => setActiveTab('request')}
-            variant={activeTab === 'request' ? 'default' : 'outline'}
-            className="px-6 py-2"
-          >
-            <AlertTriangle className="w-4 h-4 mr-2" />
-            Request Blood
-          </Button>
-          <Button
-            onClick={() => setActiveTab('donors')}
-            variant={activeTab === 'donors' ? 'default' : 'outline'}
+            onClick={() => setActiveSection('search')}
+            variant={activeSection === 'search' ? 'default' : 'outline'}
             className="px-6 py-2"
           >
             <Search className="w-4 h-4 mr-2" />
             Find Donors
           </Button>
           <Button
-            onClick={() => setActiveTab('register')}
-            variant={activeTab === 'register' ? 'default' : 'outline'}
+            onClick={() => setActiveSection('request')}
+            variant={activeSection === 'request' ? 'default' : 'outline'}
             className="px-6 py-2"
           >
-            <UserPlus className="w-4 h-4 mr-2" />
-            Register as Donor
+            <Plus className="w-4 h-4 mr-2" />
+            Request Blood
           </Button>
           <Button
-            onClick={() => setActiveTab('requests')}
-            variant={activeTab === 'requests' ? 'default' : 'outline'}
+            onClick={() => setActiveSection('donate')}
+            variant={activeSection === 'donate' ? 'default' : 'outline'}
             className="px-6 py-2"
           >
             <Heart className="w-4 h-4 mr-2" />
+            Donate Blood
+          </Button>
+          <Button
+            onClick={() => setActiveSection('requests')}
+            variant={activeSection === 'requests' ? 'default' : 'outline'}
+            className="px-6 py-2"
+          >
+            <AlertCircle className="w-4 h-4 mr-2" />
             Active Requests
           </Button>
         </div>
       </div>
 
-      {/* Patient Blood Group Section */}
-      {profile?.role === 'patient' && (
-        <Card className="mb-8 border-2 border-red-200">
+      {/* Patient Lookup Section */}
+      {(activeSection === 'search' || activeSection === 'request') && (
+        <Card className="shadow-lg">
           <CardHeader>
-            <CardTitle className="flex items-center text-red-600">
-              <Droplets className="w-5 h-5 mr-2" />
-              Your Blood Group & Donor Status
+            <CardTitle className="flex items-center text-xl">
+              <User className="w-5 h-5 mr-2 text-red-600" />
+              Patient Information
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
-            <div className="flex items-center space-x-4">
+            <div className="flex gap-4">
               <div className="flex-1">
-                <label className="block text-sm font-medium mb-1">Blood Group</label>
-                <Select value={patientBloodGroup} onValueChange={handleUpdateBloodGroup}>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select your blood group" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {bloodGroups.map(group => (
-                      <SelectItem key={group} value={group}>{group}</SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-              <div className="flex items-center space-x-2">
-                <input
-                  type="checkbox"
-                  checked={donorConsent}
-                  onChange={handleDonorConsentToggle}
-                  className="rounded"
+                <Label htmlFor="patientId">Patient ID</Label>
+                <Input
+                  id="patientId"
+                  placeholder="Enter patient ID to lookup blood group"
+                  value={patientId}
+                  onChange={(e) => setPatientId(e.target.value)}
                 />
-                <label className="text-sm font-medium">I consent to donate blood</label>
               </div>
+              <Button 
+                onClick={handlePatientIdLookup}
+                disabled={isLoading}
+                className="mt-6"
+              >
+                {isLoading ? 'Looking up...' : 'Lookup'}
+              </Button>
             </div>
+            
+            {patientData && (
+              <div className="bg-green-50 border border-green-200 rounded-lg p-4">
+                <div className="flex items-center mb-2">
+                  <CheckCircle className="w-5 h-5 text-green-600 mr-2" />
+                  <span className="font-semibold text-green-800">Patient Found</span>
+                </div>
+                <div className="grid md:grid-cols-2 gap-4 text-sm">
+                  <div>
+                    <span className="font-medium">Name:</span> {patientData.profiles.full_name}
+                  </div>
+                  <div>
+                    <span className="font-medium">Phone:</span> {patientData.profiles.phone}
+                  </div>
+                  <div>
+                    <span className="font-medium">Blood Group:</span> 
+                    <Badge className="ml-2 bg-red-100 text-red-800">
+                      {patientData.blood_group || 'Not specified'}
+                    </Badge>
+                  </div>
+                  <div>
+                    <span className="font-medium">Donor Consent:</span> 
+                    <Badge className={`ml-2 ${patientData.donor_consent ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'}`}>
+                      {patientData.donor_consent ? 'Yes' : 'No'}
+                    </Badge>
+                  </div>
+                </div>
+              </div>
+            )}
           </CardContent>
         </Card>
       )}
 
-      {/* Patient ID Lookup Section */}
-      <Card className="mb-8">
-        <CardHeader>
-          <CardTitle>Patient Blood Group Lookup</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="flex space-x-4">
-            <Input
-              placeholder="Enter Patient ID"
-              value={patientId}
-              onChange={(e) => setPatientId(e.target.value)}
-              className="flex-1"
-            />
-            <Button onClick={handlePatientIdLookup} disabled={isLoading}>
-              {isLoading ? 'Looking up...' : 'Lookup'}
-            </Button>
-          </div>
-          {patientBloodGroup && (
-            <div className="mt-4 p-4 bg-green-50 rounded-lg">
-              <p className="text-green-800 font-semibold">
-                Blood Group: <span className="text-2xl">{patientBloodGroup}</span>
-              </p>
-            </div>
+      {/* Content based on active section */}
+      {activeSection === 'search' && (
+        <>
+          {/* Manual Blood Group Selection */}
+          {!patientData?.blood_group && (
+            <Card className="shadow-lg">
+              <CardHeader>
+                <CardTitle>Manual Blood Group Selection</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="flex gap-4 items-end">
+                  <div className="flex-1">
+                    <Label htmlFor="bloodGroup">Blood Group</Label>
+                    <Select 
+                      value={selectedBloodGroup} 
+                      onValueChange={(value) => {
+                        setSelectedBloodGroup(value as BloodGroup);
+                        if (value) fetchCompatibleDonors(value as BloodGroup);
+                      }}
+                    >
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select blood group" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {bloodGroups.map((group) => (
+                          <SelectItem key={group} value={group}>{group}</SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
           )}
-        </CardContent>
-      </Card>
 
-      {/* Tab Content */}
-      {activeTab === 'request' && (
-        <Card>
+          {/* Compatible Donors */}
+          {selectedBloodGroup && (
+            <Card className="shadow-lg">
+              <CardHeader>
+                <CardTitle className="flex items-center justify-between">
+                  <span className="flex items-center">
+                    <Droplets className="w-5 h-5 mr-2 text-red-600" />
+                    Compatible Donors for {selectedBloodGroup}
+                  </span>
+                  <Badge className="bg-blue-100 text-blue-800">
+                    {donorData.length} Available
+                  </Badge>
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                {donorData.length === 0 ? (
+                  <div className="text-center py-8">
+                    <AlertCircle className="w-16 h-16 text-gray-300 mx-auto mb-4" />
+                    <p className="text-gray-500">No compatible donors found</p>
+                  </div>
+                ) : (
+                  <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
+                    {donorData.map((donor) => (
+                      <Card key={donor.id} className="border-2 border-gray-200 hover:border-red-300 transition-colors">
+                        <CardContent className="p-4">
+                          <div className="flex items-start justify-between mb-3">
+                            <div>
+                              <h3 className="font-semibold text-gray-900">{donor.donor_name}</h3>
+                              <div className="flex items-center mt-1">
+                                {donor.donor_type === 'individual' ? (
+                                  <User className="w-4 h-4 text-gray-500 mr-1" />
+                                ) : (
+                                  <Building2 className="w-4 h-4 text-gray-500 mr-1" />
+                                )}
+                                <span className="text-sm text-gray-600 capitalize">{donor.donor_type}</span>
+                              </div>
+                            </div>
+                            <Badge className="bg-red-100 text-red-800">
+                              {donor.blood_group}
+                            </Badge>
+                          </div>
+                          
+                          <div className="space-y-2 text-sm">
+                            {donor.contact_phone && (
+                              <div className="flex items-center">
+                                <Phone className="w-4 h-4 text-gray-500 mr-2" />
+                                <span>{donor.contact_phone}</span>
+                              </div>
+                            )}
+                            <div className="flex items-center">
+                              <MapPin className="w-4 h-4 text-gray-500 mr-2" />
+                              <span>{donor.city}, {donor.state}</span>
+                            </div>
+                            {donor.last_donation_date && (
+                              <div className="flex items-center">
+                                <Calendar className="w-4 h-4 text-gray-500 mr-2" />
+                                <span>Last donated: {new Date(donor.last_donation_date).toLocaleDateString()}</span>
+                              </div>
+                            )}
+                          </div>
+                          
+                          <Button 
+                            size="sm" 
+                            className="w-full mt-3 bg-red-600 hover:bg-red-700"
+                            onClick={() => {
+                              if (donor.contact_phone) {
+                                window.open(`tel:${donor.contact_phone}`);
+                              }
+                            }}
+                          >
+                            Contact Donor
+                          </Button>
+                        </CardContent>
+                      </Card>
+                    ))}
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          )}
+        </>
+      )}
+
+      {activeSection === 'request' && (
+        <Card className="shadow-lg">
           <CardHeader>
-            <CardTitle className="flex items-center text-red-600">
-              <AlertTriangle className="w-5 h-5 mr-2" />
+            <CardTitle className="flex items-center">
+              <Plus className="w-5 h-5 mr-2 text-red-600" />
               Submit Blood Request
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="grid md:grid-cols-2 gap-4">
               <div>
-                <label className="block text-sm font-medium mb-1">Units Needed</label>
-                <Input
-                  type="number"
-                  min="1"
-                  value={requestForm.unitsNeeded}
-                  onChange={(e) => setRequestForm({...requestForm, unitsNeeded: parseInt(e.target.value)})}
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium mb-1">Urgency Level</label>
-                <Select value={requestForm.urgencyLevel} onValueChange={(value) => setRequestForm({...requestForm, urgencyLevel: value})}>
+                <Label htmlFor="request-blood-group">Blood Group *</Label>
+                <Select 
+                  value={requestForm.blood_group} 
+                  onValueChange={(value) => setRequestForm({...requestForm, blood_group: value as BloodGroup})}
+                >
                   <SelectTrigger>
-                    <SelectValue />
+                    <SelectValue placeholder="Select blood group" />
                   </SelectTrigger>
                   <SelectContent>
-                    {urgencyLevels.map(level => (
-                      <SelectItem key={level.value} value={level.value}>{level.label}</SelectItem>
+                    {bloodGroups.map((group) => (
+                      <SelectItem key={group} value={group}>{group}</SelectItem>
                     ))}
                   </SelectContent>
                 </Select>
               </div>
-            </div>
-
-            <div className="grid md:grid-cols-2 gap-4">
               <div>
-                <label className="block text-sm font-medium mb-1">Hospital Name</label>
+                <Label htmlFor="units-needed">Units Needed</Label>
                 <Input
-                  value={requestForm.hospitalName}
-                  onChange={(e) => setRequestForm({...requestForm, hospitalName: e.target.value})}
-                  placeholder="Enter hospital name"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium mb-1">Contact Person *</label>
-                <Input
-                  value={requestForm.contactPerson}
-                  onChange={(e) => setRequestForm({...requestForm, contactPerson: e.target.value})}
-                  placeholder="Enter contact person name"
-                  required
+                  id="units-needed"
+                  type="number"
+                  min="1"
+                  value={requestForm.units_needed}
+                  onChange={(e) => setRequestForm({...requestForm, units_needed: parseInt(e.target.value) || 1})}
                 />
               </div>
             </div>
 
             <div className="grid md:grid-cols-2 gap-4">
               <div>
-                <label className="block text-sm font-medium mb-1">Contact Phone *</label>
-                <Input
-                  value={requestForm.contactPhone}
-                  onChange={(e) => setRequestForm({...requestForm, contactPhone: e.target.value})}
-                  placeholder="Enter contact phone"
-                  required
-                />
+                <Label htmlFor="urgency">Urgency Level</Label>
+                <Select 
+                  value={requestForm.urgency_level} 
+                  onValueChange={(value) => setRequestForm({...requestForm, urgency_level: value})}
+                >
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="critical">Critical</SelectItem>
+                    <SelectItem value="high">High</SelectItem>
+                    <SelectItem value="medium">Medium</SelectItem>
+                    <SelectItem value="low">Low</SelectItem>
+                  </SelectContent>
+                </Select>
               </div>
               <div>
-                <label className="block text-sm font-medium mb-1">Address *</label>
+                <Label htmlFor="hospital-name">Hospital Name</Label>
                 <Input
-                  value={requestForm.address}
-                  onChange={(e) => setRequestForm({...requestForm, address: e.target.value})}
-                  placeholder="Enter address"
-                  required
+                  id="hospital-name"
+                  value={requestForm.hospital_name}
+                  onChange={(e) => setRequestForm({...requestForm, hospital_name: e.target.value})}
                 />
               </div>
             </div>
 
-            <div className="grid md:grid-cols-3 gap-4">
+            <div className="grid md:grid-cols-2 gap-4">
               <div>
-                <label className="block text-sm font-medium mb-1">City</label>
+                <Label htmlFor="contact-person">Contact Person *</Label>
                 <Input
-                  value={requestForm.city}
-                  onChange={(e) => setRequestForm({...requestForm, city: e.target.value})}
-                  placeholder="Enter city"
+                  id="contact-person"
+                  value={requestForm.contact_person}
+                  onChange={(e) => setRequestForm({...requestForm, contact_person: e.target.value})}
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium mb-1">State</label>
+                <Label htmlFor="contact-phone">Contact Phone *</Label>
                 <Input
-                  value={requestForm.state}
-                  onChange={(e) => setRequestForm({...requestForm, state: e.target.value})}
-                  placeholder="Enter state"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium mb-1">Pincode</label>
-                <Input
-                  value={requestForm.pincode}
-                  onChange={(e) => setRequestForm({...requestForm, pincode: e.target.value})}
-                  placeholder="Enter pincode"
+                  id="contact-phone"
+                  value={requestForm.contact_phone}
+                  onChange={(e) => setRequestForm({...requestForm, contact_phone: e.target.value})}
                 />
               </div>
             </div>
 
             <div>
-              <label className="block text-sm font-medium mb-1">Additional Notes</label>
+              <Label htmlFor="address">Address *</Label>
+              <Input
+                id="address"
+                value={requestForm.address}
+                onChange={(e) => setRequestForm({...requestForm, address: e.target.value})}
+              />
+            </div>
+
+            <div className="grid md:grid-cols-3 gap-4">
+              <div>
+                <Label htmlFor="city">City *</Label>
+                <Input
+                  id="city"
+                  value={requestForm.city}
+                  onChange={(e) => setRequestForm({...requestForm, city: e.target.value})}
+                />
+              </div>
+              <div>
+                <Label htmlFor="state">State *</Label>
+                <Input
+                  id="state"
+                  value={requestForm.state}
+                  onChange={(e) => setRequestForm({...requestForm, state: e.target.value})}
+                />
+              </div>
+              <div>
+                <Label htmlFor="pincode">Pincode *</Label>
+                <Input
+                  id="pincode"
+                  value={requestForm.pincode}
+                  onChange={(e) => setRequestForm({...requestForm, pincode: e.target.value})}
+                />
+              </div>
+            </div>
+
+            <div>
+              <Label htmlFor="notes">Additional Notes</Label>
               <Textarea
+                id="notes"
                 value={requestForm.notes}
                 onChange={(e) => setRequestForm({...requestForm, notes: e.target.value})}
-                placeholder="Any additional information..."
-                rows={3}
+                placeholder="Any additional information about the blood requirement"
               />
             </div>
 
             <Button 
-              onClick={handleBloodRequest} 
-              disabled={isLoading || !patientBloodGroup}
+              onClick={handleSubmitRequest}
+              disabled={isLoading}
               className="w-full bg-red-600 hover:bg-red-700"
-              size="lg"
             >
               {isLoading ? 'Submitting...' : 'Submit Blood Request'}
             </Button>
@@ -639,110 +732,30 @@ const BloodAvailability = () => {
         </Card>
       )}
 
-      {activeTab === 'donors' && (
-        <div className="space-y-6">
-          {patientBloodGroup && (
-            <Card className="bg-blue-50 border-blue-200">
-              <CardContent className="p-4">
-                <h3 className="font-semibold text-blue-800 mb-2">
-                  Showing compatible donors for blood group: {patientBloodGroup}
-                </h3>
-                <p className="text-blue-600 text-sm">
-                  Compatible donors: {getCompatibleBloodGroups(patientBloodGroup).join(', ')}
-                </p>
-              </CardContent>
-            </Card>
-          )}
-
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {bloodDonors
-              .filter(donor => !patientBloodGroup || getCompatibleBloodGroups(patientBloodGroup).includes(donor.blood_group))
-              .map((donor) => (
-              <Card key={donor.id} className="hover:shadow-lg transition-shadow">
-                <CardContent className="p-6">
-                  <div className="flex items-start justify-between mb-4">
-                    <div>
-                      <h3 className="font-bold text-lg">{donor.donor_name}</h3>
-                      <div className="flex items-center space-x-2 mt-1">
-                        {getDonorTypeIcon(donor.donor_type)}
-                        <span className="text-sm text-gray-600 capitalize">
-                          {donor.donor_type.replace('_', ' ')}
-                        </span>
-                      </div>
-                    </div>
-                    <Badge className="bg-red-100 text-red-800 text-lg font-bold">
-                      {donor.blood_group}
-                    </Badge>
-                  </div>
-
-                  <div className="space-y-2 text-sm">
-                    {donor.contact_phone && (
-                      <div className="flex items-center">
-                        <Phone className="w-4 h-4 mr-2 text-gray-400" />
-                        <span>{donor.contact_phone}</span>
-                      </div>
-                    )}
-                    <div className="flex items-center">
-                      <MapPin className="w-4 h-4 mr-2 text-gray-400" />
-                      <span>{donor.city}, {donor.state}</span>
-                    </div>
-                    {donor.last_donation_date && (
-                      <div className="flex items-center">
-                        <Clock className="w-4 h-4 mr-2 text-gray-400" />
-                        <span>Last donated: {new Date(donor.last_donation_date).toLocaleDateString()}</span>
-                      </div>
-                    )}
-                  </div>
-
-                  <div className="mt-4 flex space-x-2">
-                    <Button size="sm" className="flex-1">
-                      <Phone className="w-4 h-4 mr-1" />
-                      Contact
-                    </Button>
-                    <Button size="sm" variant="outline" className="flex-1">
-                      <MapPin className="w-4 h-4 mr-1" />
-                      Location
-                    </Button>
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
-
-          {bloodDonors.length === 0 && (
-            <Card>
-              <CardContent className="p-8 text-center">
-                <Droplets className="w-16 h-16 text-gray-300 mx-auto mb-4" />
-                <h3 className="text-xl font-semibold text-gray-600 mb-2">No Donors Found</h3>
-                <p className="text-gray-500">No blood donors are currently available. Please try again later.</p>
-              </CardContent>
-            </Card>
-          )}
-        </div>
-      )}
-
-      {activeTab === 'register' && (
-        <Card>
+      {activeSection === 'donate' && (
+        <Card className="shadow-lg">
           <CardHeader>
-            <CardTitle className="flex items-center text-green-600">
-              <UserPlus className="w-5 h-5 mr-2" />
+            <CardTitle className="flex items-center">
+              <Heart className="w-5 h-5 mr-2 text-red-600" />
               Register as Blood Donor
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="grid md:grid-cols-2 gap-4">
               <div>
-                <label className="block text-sm font-medium mb-1">Donor Name *</label>
+                <Label htmlFor="donor-name">Full Name *</Label>
                 <Input
-                  value={donorForm.donorName}
-                  onChange={(e) => setDonorForm({...donorForm, donorName: e.target.value})}
-                  placeholder="Enter donor name"
-                  required
+                  id="donor-name"
+                  value={donorForm.donor_name}
+                  onChange={(e) => setDonorForm({...donorForm, donor_name: e.target.value})}
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium mb-1">Donor Type</label>
-                <Select value={donorForm.donorType} onValueChange={(value) => setDonorForm({...donorForm, donorType: value})}>
+                <Label htmlFor="donor-type">Donor Type</Label>
+                <Select 
+                  value={donorForm.donor_type} 
+                  onValueChange={(value) => setDonorForm({...donorForm, donor_type: value as 'individual' | 'blood_bank'})}
+                >
                   <SelectTrigger>
                     <SelectValue />
                   </SelectTrigger>
@@ -756,66 +769,84 @@ const BloodAvailability = () => {
 
             <div className="grid md:grid-cols-2 gap-4">
               <div>
-                <label className="block text-sm font-medium mb-1">Contact Phone</label>
-                <Input
-                  value={donorForm.contactPhone}
-                  onChange={(e) => setDonorForm({...donorForm, contactPhone: e.target.value})}
-                  placeholder="Enter contact phone"
-                />
+                <Label htmlFor="donor-blood-group">Blood Group *</Label>
+                <Select 
+                  value={donorForm.blood_group} 
+                  onValueChange={(value) => setDonorForm({...donorForm, blood_group: value as BloodGroup})}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select blood group" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {bloodGroups.map((group) => (
+                      <SelectItem key={group} value={group}>{group}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
               </div>
               <div>
-                <label className="block text-sm font-medium mb-1">Address</label>
+                <Label htmlFor="donor-phone">Contact Phone</Label>
                 <Input
-                  value={donorForm.address}
-                  onChange={(e) => setDonorForm({...donorForm, address: e.target.value})}
-                  placeholder="Enter address"
+                  id="donor-phone"
+                  value={donorForm.contact_phone}
+                  onChange={(e) => setDonorForm({...donorForm, contact_phone: e.target.value})}
                 />
               </div>
+            </div>
+
+            <div>
+              <Label htmlFor="donor-address">Address</Label>
+              <Input
+                id="donor-address"
+                value={donorForm.address}
+                onChange={(e) => setDonorForm({...donorForm, address: e.target.value})}
+              />
             </div>
 
             <div className="grid md:grid-cols-3 gap-4">
               <div>
-                <label className="block text-sm font-medium mb-1">City *</label>
+                <Label htmlFor="donor-city">City *</Label>
                 <Input
+                  id="donor-city"
                   value={donorForm.city}
                   onChange={(e) => setDonorForm({...donorForm, city: e.target.value})}
-                  placeholder="Enter city"
-                  required
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium mb-1">State *</label>
+                <Label htmlFor="donor-state">State *</Label>
                 <Input
+                  id="donor-state"
                   value={donorForm.state}
                   onChange={(e) => setDonorForm({...donorForm, state: e.target.value})}
-                  placeholder="Enter state"
-                  required
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium mb-1">Pincode *</label>
+                <Label htmlFor="donor-pincode">Pincode</Label>
                 <Input
+                  id="donor-pincode"
                   value={donorForm.pincode}
                   onChange={(e) => setDonorForm({...donorForm, pincode: e.target.value})}
-                  placeholder="Enter pincode"
-                  required
                 />
               </div>
             </div>
 
-            {patientBloodGroup && (
-              <div className="p-4 bg-green-50 rounded-lg">
-                <p className="text-green-800 font-semibold">
-                  Your blood group: <span className="text-xl">{patientBloodGroup}</span>
-                </p>
-              </div>
-            )}
+            <div className="flex items-center space-x-2">
+              <input
+                type="checkbox"
+                id="donor-consent"
+                checked={donorForm.consent_given}
+                onChange={(e) => setDonorForm({...donorForm, consent_given: e.target.checked})}
+                className="rounded border-gray-300"
+              />
+              <Label htmlFor="donor-consent" className="text-sm">
+                I consent to be contacted for blood donation requests
+              </Label>
+            </div>
 
             <Button 
-              onClick={handleDonorRegistration} 
-              disabled={isLoading || !patientBloodGroup}
-              className="w-full bg-green-600 hover:bg-green-700"
-              size="lg"
+              onClick={handleDonorRegistration}
+              disabled={isLoading}
+              className="w-full bg-red-600 hover:bg-red-700"
             >
               {isLoading ? 'Registering...' : 'Register as Donor'}
             </Button>
@@ -823,80 +854,99 @@ const BloodAvailability = () => {
         </Card>
       )}
 
-      {activeTab === 'requests' && (
-        <div className="space-y-6">
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {bloodRequests.map((request) => (
-              <Card key={request.id} className="hover:shadow-lg transition-shadow border-l-4 border-l-red-500">
-                <CardContent className="p-6">
-                  <div className="flex items-start justify-between mb-4">
-                    <div>
-                      <Badge className="bg-red-100 text-red-800 text-lg font-bold mb-2">
-                        {request.blood_group}
-                      </Badge>
-                      <h3 className="font-bold text-lg">{request.units_needed} Unit(s) Needed</h3>
-                    </div>
-                    <Badge className={getUrgencyColor(request.urgency_level)}>
-                      {request.urgency_level.charAt(0).toUpperCase() + request.urgency_level.slice(1)}
-                    </Badge>
-                  </div>
-
-                  <div className="space-y-2 text-sm">
-                    <div className="flex items-center">
-                      <User className="w-4 h-4 mr-2 text-gray-400" />
-                      <span>{request.contact_person}</span>
-                    </div>
-                    <div className="flex items-center">
-                      <Phone className="w-4 h-4 mr-2 text-gray-400" />
-                      <span>{request.contact_phone}</span>
-                    </div>
-                    <div className="flex items-center">
-                      <MapPin className="w-4 h-4 mr-2 text-gray-400" />
-                      <span>{request.city}, {request.state}</span>
-                    </div>
-                    {request.hospital_name && (
-                      <div className="flex items-center">
-                        <Building2 className="w-4 h-4 mr-2 text-gray-400" />
-                        <span>{request.hospital_name}</span>
+      {activeSection === 'requests' && (
+        <Card className="shadow-lg">
+          <CardHeader>
+            <CardTitle className="flex items-center justify-between">
+              <span className="flex items-center">
+                <AlertCircle className="w-5 h-5 mr-2 text-red-600" />
+                Active Blood Requests
+              </span>
+              <Badge className="bg-blue-100 text-blue-800">
+                {bloodRequests.length} Active
+              </Badge>
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            {bloodRequests.length === 0 ? (
+              <div className="text-center py-8">
+                <AlertCircle className="w-16 h-16 text-gray-300 mx-auto mb-4" />
+                <p className="text-gray-500">No active blood requests</p>
+              </div>
+            ) : (
+              <div className="space-y-4">
+                {bloodRequests.map((request) => (
+                  <Card key={request.id} className="border-2 border-red-200">
+                    <CardContent className="p-4">
+                      <div className="flex items-start justify-between mb-3">
+                        <div>
+                          <div className="flex items-center gap-2 mb-2">
+                            <Badge className="bg-red-100 text-red-800">
+                              {request.blood_group}
+                            </Badge>
+                            <Badge className={getUrgencyColor(request.urgency_level)}>
+                              {request.urgency_level.toUpperCase()}
+                            </Badge>
+                            <span className="text-sm text-gray-500">
+                              {request.units_needed} {request.units_needed === 1 ? 'unit' : 'units'} needed
+                            </span>
+                          </div>
+                          <h3 className="font-semibold text-gray-900">{request.contact_person}</h3>
+                          {request.hospital_name && (
+                            <p className="text-sm text-gray-600">{request.hospital_name}</p>
+                          )}
+                        </div>
+                        <div className="text-right text-sm text-gray-500">
+                          <Clock className="w-4 h-4 inline mr-1" />
+                          {new Date(request.created_at).toLocaleDateString()}
+                        </div>
                       </div>
-                    )}
-                    <div className="flex items-center">
-                      <Clock className="w-4 h-4 mr-2 text-gray-400" />
-                      <span>{new Date(request.created_at).toLocaleDateString()}</span>
-                    </div>
-                  </div>
-
-                  {request.notes && (
-                    <div className="mt-3 p-2 bg-gray-50 rounded text-sm">
-                      <strong>Notes:</strong> {request.notes}
-                    </div>
-                  )}
-
-                  <div className="mt-4 flex space-x-2">
-                    <Button size="sm" className="flex-1 bg-red-600 hover:bg-red-700">
-                      <Phone className="w-4 h-4 mr-1" />
-                      Contact
-                    </Button>
-                    <Button size="sm" variant="outline" className="flex-1">
-                      <Heart className="w-4 h-4 mr-1" />
-                      Respond
-                    </Button>
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
-
-          {bloodRequests.length === 0 && (
-            <Card>
-              <CardContent className="p-8 text-center">
-                <Heart className="w-16 h-16 text-gray-300 mx-auto mb-4" />
-                <h3 className="text-xl font-semibold text-gray-600 mb-2">No Active Requests</h3>
-                <p className="text-gray-500">There are currently no active blood requests.</p>
-              </CardContent>
-            </Card>
-          )}
-        </div>
+                      
+                      <div className="grid md:grid-cols-2 gap-4 text-sm mb-3">
+                        <div className="flex items-center">
+                          <Phone className="w-4 h-4 text-gray-500 mr-2" />
+                          <span>{request.contact_phone}</span>
+                        </div>
+                        <div className="flex items-center">
+                          <MapPin className="w-4 h-4 text-gray-500 mr-2" />
+                          <span>{request.city}, {request.state}</span>
+                        </div>
+                      </div>
+                      
+                      {request.notes && (
+                        <div className="bg-gray-50 rounded p-2 text-sm mb-3">
+                          <strong>Notes:</strong> {request.notes}
+                        </div>
+                      )}
+                      
+                      <div className="flex gap-2">
+                        <Button 
+                          size="sm" 
+                          onClick={() => window.open(`tel:${request.contact_phone}`)}
+                          className="bg-red-600 hover:bg-red-700"
+                        >
+                          <Phone className="w-4 h-4 mr-1" />
+                          Call
+                        </Button>
+                        <Button 
+                          size="sm" 
+                          variant="outline"
+                          onClick={() => {
+                            const address = `${request.address}, ${request.city}, ${request.state} ${request.pincode}`;
+                            window.open(`https://maps.google.com/maps?q=${encodeURIComponent(address)}`);
+                          }}
+                        >
+                          <MapPin className="w-4 h-4 mr-1" />
+                          Directions
+                        </Button>
+                      </div>
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+            )}
+          </CardContent>
+        </Card>
       )}
     </div>
   );
