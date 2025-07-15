@@ -25,8 +25,8 @@ interface Stream {
     profiles: {
       full_name: string;
       avatar_url: string;
-    };
-  };
+    } | null;
+  } | null;
 }
 
 interface CommunityPost {
@@ -41,7 +41,7 @@ interface CommunityPost {
     full_name: string;
     avatar_url: string;
     role: string;
-  };
+  } | null;
 }
 
 const Feed = () => {
@@ -70,13 +70,19 @@ const Feed = () => {
       let query = supabase
         .from('streams')
         .select(`
-          *,
-          doctors (
+          id,
+          title,
+          description,
+          category,
+          is_live,
+          viewer_count,
+          thumbnail_url,
+          doctors!inner (
             id,
             specialization,
             bio,
             country,
-            profiles (
+            profiles!inner (
               full_name,
               avatar_url
             )
@@ -90,11 +96,37 @@ const Feed = () => {
       }
 
       const { data, error } = await query;
-      if (error) throw error;
+      if (error) {
+        console.error('Error fetching streams:', error);
+        setStreams([]);
+        return;
+      }
       
-      setStreams(data || []);
+      // Transform the data to match our interface
+      const transformedStreams = (data || []).map((stream: any) => ({
+        id: stream.id,
+        title: stream.title,
+        description: stream.description,
+        category: stream.category,
+        is_live: stream.is_live,
+        viewer_count: stream.viewer_count || 0,
+        thumbnail_url: stream.thumbnail_url,
+        doctors: stream.doctors ? {
+          id: stream.doctors.id,
+          specialization: stream.doctors.specialization,
+          bio: stream.doctors.bio,
+          country: stream.doctors.country,
+          profiles: stream.doctors.profiles ? {
+            full_name: stream.doctors.profiles.full_name,
+            avatar_url: stream.doctors.profiles.avatar_url
+          } : null
+        } : null
+      }));
+
+      setStreams(transformedStreams);
     } catch (error) {
       console.error('Error fetching streams:', error);
+      setStreams([]);
     }
   };
 
@@ -103,8 +135,14 @@ const Feed = () => {
       let query = supabase
         .from('community_posts')
         .select(`
-          *,
-          profiles (
+          id,
+          title,
+          content,
+          category,
+          likes_count,
+          replies_count,
+          created_at,
+          profiles!inner (
             full_name,
             avatar_url,
             role
@@ -118,11 +156,32 @@ const Feed = () => {
       }
 
       const { data, error } = await query;
-      if (error) throw error;
+      if (error) {
+        console.error('Error fetching community posts:', error);
+        setCommunityPosts([]);
+        return;
+      }
       
-      setCommunityPosts(data || []);
+      // Transform the data to match our interface
+      const transformedPosts = (data || []).map((post: any) => ({
+        id: post.id,
+        title: post.title,
+        content: post.content,
+        category: post.category,
+        likes_count: post.likes_count || 0,
+        replies_count: post.replies_count || 0,
+        created_at: post.created_at,
+        profiles: post.profiles ? {
+          full_name: post.profiles.full_name,
+          avatar_url: post.profiles.avatar_url,
+          role: post.profiles.role
+        } : null
+      }));
+
+      setCommunityPosts(transformedPosts);
     } catch (error) {
       console.error('Error fetching community posts:', error);
+      setCommunityPosts([]);
     } finally {
       setLoading(false);
     }
@@ -249,9 +308,9 @@ const Feed = () => {
                     <CardContent className="p-4">
                       <div className="flex items-start space-x-3">
                         <Avatar className="w-10 h-10">
-                          <AvatarImage src={stream.doctors.profiles.avatar_url || ''} />
+                          <AvatarImage src={stream.doctors?.profiles?.avatar_url || ''} />
                           <AvatarFallback>
-                            {stream.doctors.profiles.full_name?.charAt(0) || 'D'}
+                            {stream.doctors?.profiles?.full_name?.charAt(0) || 'D'}
                           </AvatarFallback>
                         </Avatar>
                         
@@ -262,10 +321,10 @@ const Feed = () => {
                             </h3>
                           </Link>
                           <p className="text-sm text-gray-600 mt-1">
-                            Dr. {stream.doctors.profiles.full_name}
+                            Dr. {stream.doctors?.profiles?.full_name || 'Unknown'}
                           </p>
                           <p className="text-sm text-gray-500">
-                            {stream.doctors.specialization} • {stream.doctors.country}
+                            {stream.doctors?.specialization} • {stream.doctors?.country}
                           </p>
                         </div>
                       </div>
@@ -290,18 +349,18 @@ const Feed = () => {
                     <CardContent className="p-6">
                       <div className="flex items-start space-x-4">
                         <Avatar className="w-10 h-10">
-                          <AvatarImage src={post.profiles.avatar_url || ''} />
+                          <AvatarImage src={post.profiles?.avatar_url || ''} />
                           <AvatarFallback>
-                            {post.profiles.full_name?.charAt(0) || 'U'}
+                            {post.profiles?.full_name?.charAt(0) || 'U'}
                           </AvatarFallback>
                         </Avatar>
                         
                         <div className="flex-1 min-w-0">
                           <div className="flex items-center space-x-2 mb-2">
                             <span className="font-medium text-arogya-dark-teal">
-                              {post.profiles.full_name}
+                              {post.profiles?.full_name || 'Anonymous'}
                             </span>
-                            {post.profiles.role === 'doctor' && (
+                            {post.profiles?.role === 'doctor' && (
                               <Badge variant="secondary" className="text-xs">Doctor</Badge>
                             )}
                             <span className="text-sm text-gray-500">•</span>
