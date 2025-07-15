@@ -1,13 +1,16 @@
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { Eye, EyeOff, Mail, Lock, User, Heart, UserPlus, Phone } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 
 const Signup = () => {
+  const [searchParams] = useSearchParams();
+  const initialUserType = searchParams.get('type') || 'patient';
+  
   const [formData, setFormData] = useState({
     name: '',
     email: '',
@@ -17,11 +20,22 @@ const Signup = () => {
   });
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
-  const [userType, setUserType] = useState<'patient' | 'doctor' | 'hospital' | 'admin'>('patient');
+  const [userType, setUserType] = useState<'patient' | 'doctor' | 'hospital' | 'admin'>(initialUserType as any);
   const [isLoading, setIsLoading] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
   const navigate = useNavigate();
   const { signUp } = useAuth();
+
+  // Handle admin signup with pre-filled email
+  useEffect(() => {
+    if (userType === 'admin' && !formData.email) {
+      setFormData(prev => ({
+        ...prev,
+        email: 'vasishthaanagh@gmail.com',
+        name: 'Anagh Vasishtha'
+      }));
+    }
+  }, [userType]);
 
   const validateForm = () => {
     const newErrors: Record<string, string> = {};
@@ -74,6 +88,21 @@ const Signup = () => {
     }
   };
 
+  const getRoleDescription = (role: string) => {
+    switch (role) {
+      case 'patient':
+        return 'Join our health community to connect with doctors, watch educational streams, and get support';
+      case 'doctor':
+        return 'Share your expertise through live streams, connect with patients, and build your professional community';
+      case 'hospital':
+        return 'Manage your hospital operations and connect with the healthcare network';
+      case 'admin':
+        return 'Administrative access to manage the platform and users';
+      default:
+        return '';
+    }
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-arogya-light-blue/20 via-white to-arogya-beige-yellow/10">
       {/* Header with Logo */}
@@ -112,10 +141,10 @@ const Signup = () => {
             </div>
             <div className="space-y-4">
               <h2 className="text-3xl font-bold text-arogya-dark-teal">
-                Join the Arogya Care Family
+                Join the Global Health Community
               </h2>
               <p className="text-lg text-gray-600 max-w-md">
-                Start your journey towards better health with our comprehensive healthcare platform.
+                Connect with healthcare professionals and patients worldwide. Your health journey starts here.
               </p>
             </div>
           </div>
@@ -124,8 +153,8 @@ const Signup = () => {
           <div className="flex justify-center">
             <Card className="w-full max-w-md shadow-2xl border-0">
               <CardHeader className="text-center space-y-4">
-                <CardTitle className="text-3xl font-bold text-arogya-dark-teal">Create Account</CardTitle>
-                <p className="text-gray-600">Join thousands of satisfied users</p>
+                <CardTitle className="text-3xl font-bold text-arogya-dark-teal">Join Arogya Care</CardTitle>
+                <p className="text-gray-600">Create your account to get started</p>
               </CardHeader>
               <CardContent>
                 {/* User Type Selection */}
@@ -133,7 +162,7 @@ const Signup = () => {
                   <label className="block text-sm font-medium text-gray-700 mb-3">
                     I want to join as a
                   </label>
-                  <div className="grid grid-cols-2 gap-2">
+                  <div className="grid grid-cols-2 gap-2 mb-4">
                     {(['patient', 'doctor', 'hospital', 'admin'] as const).map((type) => (
                       <Button
                         key={type}
@@ -150,6 +179,9 @@ const Signup = () => {
                       </Button>
                     ))}
                   </div>
+                  <p className="text-sm text-gray-600 bg-arogya-light-blue/20 p-3 rounded-lg">
+                    {getRoleDescription(userType)}
+                  </p>
                 </div>
 
                 <form onSubmit={handleSubmit} className="space-y-4">
@@ -180,6 +212,7 @@ const Signup = () => {
                       className={`pl-10 h-12 border-2 focus:border-arogya-dark-green ${
                         errors.email ? 'border-red-500' : ''
                       }`}
+                      disabled={userType === 'admin'}
                       required
                     />
                     {errors.email && (
@@ -202,7 +235,7 @@ const Signup = () => {
                     <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
                     <Input
                       type={showPassword ? "text" : "password"}
-                      placeholder="Password (min. 6 characters)"
+                      placeholder={userType === 'admin' ? "Password: Avi_1207" : "Password (min. 6 characters)"}
                       value={formData.password}
                       onChange={(e) => setFormData({...formData, password: e.target.value})}
                       className={`pl-10 pr-10 h-12 border-2 focus:border-arogya-dark-green ${
@@ -257,7 +290,7 @@ const Signup = () => {
                         <span>Creating account...</span>
                       </div>
                     ) : (
-                      'Create Account'
+                      `Join as ${userType.charAt(0).toUpperCase() + userType.slice(1)}`
                     )}
                   </Button>
                 </form>

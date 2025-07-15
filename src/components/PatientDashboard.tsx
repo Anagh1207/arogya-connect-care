@@ -1,390 +1,348 @@
+
 import { useState } from 'react';
+import { useAuth } from '@/hooks/useAuth';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Dialog, DialogContent } from '@/components/ui/dialog';
-import { Calendar, Clock, User, FileText, Heart, Phone, Video, MessageSquare, Star, MapPin, Plus } from 'lucide-react';
-import Header from './Header';
-import Footer from './Footer';
-import SubscriptionUpgrade from './SubscriptionUpgrade';
-import BookAppointment from './BookAppointment';
-import HealthRecordsUpload from './HealthRecordsUpload';
-import PrescriptionManagement from './PrescriptionManagement';
-import { useAuth } from '@/hooks/useAuth';
-import { usePatientData } from '@/hooks/usePatientData';
-import { useHealthRecords } from '@/hooks/useHealthRecords';
-import { format } from 'date-fns';
-import { toast } from '@/hooks/use-toast';
+import { 
+  Video, 
+  Users, 
+  MessageCircle, 
+  Settings, 
+  Bell,
+  Heart,
+  Play,
+  Search,
+  LogOut,
+  BookOpen,
+  Calendar
+} from 'lucide-react';
+import CommunityDashboard from './CommunityDashboard';
+import { Link } from 'react-router-dom';
 
 const PatientDashboard = () => {
-  const { profile } = useAuth();
-  const { appointments, prescriptions, notifications, vitals, loading, markNotificationAsRead, refetch } = usePatientData();
-  const { records: healthRecords, loading: recordsLoading, refetch: refetchRecords } = useHealthRecords();
-  const [showUpgrade, setShowUpgrade] = useState(true);
-  const [showBookAppointment, setShowBookAppointment] = useState(false);
+  const { user, profile, signOut } = useAuth();
+  const [activeTab, setActiveTab] = useState('feed');
 
-  if (loading) {
-    return (
-      <div className="min-h-screen bg-gradient-to-br from-arogya-light-blue/20 via-white to-arogya-beige-yellow/10">
-        <Header />
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-          <div className="flex items-center justify-center h-64">
-            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-arogya-dark-green"></div>
-          </div>
-        </div>
-        <Footer />
-      </div>
-    );
-  }
+  const followedDoctors = [
+    {
+      name: 'Dr. Sarah Johnson',
+      specialty: 'Cardiology',
+      avatar: null,
+      followers: '2.3K',
+      isLive: true
+    },
+    {
+      name: 'Dr. Michael Chen',
+      specialty: 'Mental Health',
+      avatar: null,
+      followers: '1.8K',
+      isLive: false
+    },
+    {
+      name: 'Dr. Emily Davis',
+      specialty: 'Nutrition',
+      avatar: null,
+      followers: '3.1K',
+      isLive: false
+    }
+  ];
 
-  const upcomingAppointments = appointments.filter(apt => apt.status === 'scheduled');
-  const nextAppointment = upcomingAppointments[0];
-  const activePrescriptions = prescriptions.filter(p => p.status === 'active');
-  const unreadNotifications = notifications.filter(n => !n.is_read);
+  const upcomingStreams = [
+    {
+      title: 'Managing Diabetes in Daily Life',
+      doctor: 'Dr. Robert Kim',
+      time: 'Today, 3:00 PM',
+      viewers: 245
+    },
+    {
+      title: 'Stress Management Techniques',
+      doctor: 'Dr. Lisa Wang',
+      time: 'Tomorrow, 10:00 AM',
+      viewers: 180
+    },
+    {
+      title: 'Healthy Heart Exercises',
+      doctor: 'Dr. Sarah Johnson',
+      time: 'Tomorrow, 7:00 PM',
+      viewers: 320
+    }
+  ];
 
-  const handleBookAppointment = () => {
-    setShowBookAppointment(true);
-  };
-
-  const handleAppointmentSuccess = () => {
-    setShowBookAppointment(false);
-    refetch.appointments();
-    toast({
-      title: "Appointment Booked",
-      description: "Your appointment has been successfully scheduled!",
-    });
-  };
-
-  const handleJoinCall = (appointmentId: string) => {
-    toast({
-      title: "Join Video Call",
-      description: "Video consultation will start shortly...",
-    });
-  };
-
-  const handleEmergencyCall = (number: string) => {
-    window.open(`tel:${number}`, '_self');
-  };
-
-  const handleRefillRequest = (prescriptionId: string) => {
-    toast({
-      title: "Refill Requested",
-      description: "Your prescription refill request has been sent to the doctor.",
-    });
-  };
+  const healthTopics = [
+    { name: 'Heart Health', posts: 145, trending: true },
+    { name: 'Mental Wellness', posts: 234, trending: true },
+    { name: 'Diabetes Care', posts: 89, trending: false },
+    { name: 'Nutrition', posts: 167, trending: true },
+    { name: 'Exercise & Fitness', posts: 201, trending: false }
+  ];
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-arogya-light-blue/20 via-white to-arogya-beige-yellow/10">
-      <Header />
-      
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold text-arogya-dark-teal mb-2">
-            Hello, {profile?.full_name || 'Patient'}!
-          </h1>
-          <p className="text-gray-600">Welcome to your personal health dashboard</p>
-          {unreadNotifications.length > 0 && (
-            <div className="mt-4 p-3 bg-blue-50 border border-blue-200 rounded-lg">
-              <p className="text-blue-800">
-                You have {unreadNotifications.length} unread notification{unreadNotifications.length > 1 ? 's' : ''}
-              </p>
+    <div className="min-h-screen bg-gradient-to-br from-arogya-light-blue/20 to-white">
+      {/* Header */}
+      <header className="bg-white/80 backdrop-blur-sm border-b border-arogya-light-blue/30">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex justify-between items-center h-16">
+            <div className="flex items-center">
+              <img 
+                src="/lovable-uploads/ab2f5346-9dbf-46fd-9e64-97bb5022d676.png" 
+                alt="Arogya Care" 
+                className="h-8 w-8 mr-3"
+              />
+              <span className="text-xl font-bold bg-gradient-to-r from-arogya-dark-teal to-arogya-dark-green bg-clip-text text-transparent">
+                Arogya Care
+              </span>
             </div>
-          )}
+            
+            <nav className="hidden md:flex space-x-8">
+              <Link to="/feed" className="text-arogya-dark-green font-medium">Feed</Link>
+              <Link to="/explore" className="text-gray-600 hover:text-arogya-dark-green">Explore</Link>
+              <Link to="/community" className="text-gray-600 hover:text-arogya-dark-green">Community</Link>
+              <Link to="/chat" className="text-gray-600 hover:text-arogya-dark-green">Messages</Link>
+            </nav>
+
+            <div className="flex items-center space-x-4">
+              <Button variant="ghost" size="sm">
+                <Bell className="w-4 h-4" />
+              </Button>
+              <Button variant="ghost" size="sm">
+                <Settings className="w-4 h-4" />
+              </Button>
+              <Button variant="ghost" size="sm" onClick={signOut}>
+                <LogOut className="w-4 h-4" />
+              </Button>
+              <Avatar>
+                <AvatarImage src={profile?.avatar_url || ''} />
+                <AvatarFallback>
+                  {profile?.full_name?.charAt(0) || 'P'}
+                </AvatarFallback>
+              </Avatar>
+            </div>
+          </div>
+        </div>
+      </header>
+
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        {/* Welcome Section */}
+        <div className="mb-8">
+          <h1 className="text-3xl font-bold text-arogya-dark-teal">
+            Welcome back, {profile?.full_name}
+          </h1>
+          <p className="text-gray-600 mt-1">
+            Stay connected with your health community and discover new content
+          </p>
         </div>
 
-        {showUpgrade && (
-          <SubscriptionUpgrade 
-            variant="banner" 
-            context="dashboard" 
-            onClose={() => setShowUpgrade(false)} 
-          />
-        )}
-
-        {/* Quick Stats */}
-        <div className="grid lg:grid-cols-4 gap-6 mb-8">
-          <Card className="bg-arogya-dark-green text-white">
-            <CardContent className="p-6">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-green-100">Next Appointment</p>
-                  {nextAppointment ? (
-                    <>
-                      <p className="text-2xl font-bold text-white">
-                        {format(new Date(nextAppointment.appointment_date), 'MMM dd')}
-                      </p>
-                      <p className="text-green-100">{nextAppointment.doctor.full_name}</p>
-                    </>
-                  ) : (
-                    <>
-                      <p className="text-2xl font-bold text-white">None</p>
-                      <p className="text-green-100">No upcoming appointments</p>
-                    </>
-                  )}
-                </div>
-                <Calendar className="w-8 h-8 text-green-200" />
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardContent className="p-6">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-gray-600">Health Score</p>
-                  <p className="text-2xl font-bold text-arogya-dark-green">85/100</p>
-                  <p className="text-arogya-dark-green text-sm">Very Good</p>
-                </div>
-                <Heart className="w-8 h-8 text-arogya-dark-green" />
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardContent className="p-6">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-gray-600">Active Prescriptions</p>
-                  <p className="text-2xl font-bold text-gray-900">{activePrescriptions.length}</p>
-                  <p className="text-arogya-dark-green text-sm">
-                    {activePrescriptions.length} medication{activePrescriptions.length !== 1 ? 's' : ''}
-                  </p>
-                </div>
-                <FileText className="w-8 h-8 text-arogya-dark-green" />
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardContent className="p-6">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-gray-600">Health Records</p>
-                  <p className="text-2xl font-bold text-gray-900">{healthRecords.length}</p>
-                  <p className="text-arogya-dark-green text-sm">Files uploaded</p>
-                </div>
-                <FileText className="w-8 h-8 text-arogya-dark-green" />
-              </div>
-            </CardContent>
-          </Card>
-        </div>
-
-        <Tabs defaultValue="appointments" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-5 lg:w-fit">
-            <TabsTrigger value="appointments">Appointments</TabsTrigger>
-            <TabsTrigger value="prescriptions">Prescriptions</TabsTrigger>
-            <TabsTrigger value="records">Health Records</TabsTrigger>
-            <TabsTrigger value="vitals">Vitals</TabsTrigger>
-            <TabsTrigger value="emergency">Emergency</TabsTrigger>
+        {/* Main Content Tabs */}
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
+          <TabsList className="grid w-full grid-cols-4">
+            <TabsTrigger value="feed">My Feed</TabsTrigger>
+            <TabsTrigger value="discover">Discover</TabsTrigger>
+            <TabsTrigger value="community">Community</TabsTrigger>
+            <TabsTrigger value="following">Following</TabsTrigger>
           </TabsList>
 
-          <TabsContent value="appointments">
-            <Card>
-              <CardHeader>
-                <div className="flex justify-between items-center">
-                  <CardTitle className="text-arogya-dark-teal">My Appointments</CardTitle>
-                  <Button 
-                    onClick={handleBookAppointment}
-                    className="bg-arogya-dark-green hover:bg-arogya-light-green text-white"
-                  >
-                    <Plus className="w-4 h-4 mr-2" />
-                    Book New Appointment
-                  </Button>
-                </div>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-4">
-                  {appointments.length === 0 ? (
-                    <div className="text-center py-8">
-                      <Calendar className="w-16 h-16 text-gray-400 mx-auto mb-4" />
-                      <h3 className="text-lg font-medium text-gray-900 mb-2">No Appointments</h3>
-                      <p className="text-gray-600">You don't have any appointments scheduled.</p>
-                      <Button 
-                        onClick={handleBookAppointment}
-                        className="mt-4 bg-arogya-dark-green hover:bg-arogya-light-green text-white"
-                      >
-                        Book Your First Appointment
-                      </Button>
-                    </div>
-                  ) : (
-                    appointments.map(appointment => (
-                      <div key={appointment.id} className="flex items-center justify-between p-4 border border-gray-200 rounded-lg hover:bg-gray-50">
-                        <div className="flex items-center space-x-4">
-                          <div className="w-12 h-12 bg-arogya-light-blue rounded-full flex items-center justify-center">
-                            <User className="w-6 h-6 text-arogya-dark-green" />
-                          </div>
+          <TabsContent value="feed" className="space-y-6">
+            <div className="grid lg:grid-cols-3 gap-6">
+              {/* Main Feed */}
+              <div className="lg:col-span-2 space-y-6">
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="text-arogya-dark-teal flex items-center">
+                      <Play className="w-5 h-5 mr-2" />
+                      Live Now
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="bg-gradient-to-br from-arogya-light-blue/30 to-arogya-beige-yellow/30 rounded-lg p-4">
+                      <div className="flex items-center justify-between mb-3">
+                        <div className="flex items-center space-x-3">
+                          <Avatar>
+                            <AvatarFallback>SJ</AvatarFallback>
+                          </Avatar>
                           <div>
-                            <h3 className="font-semibold text-gray-900">{appointment.doctor.full_name}</h3>
-                            <p className="text-gray-600">
-                              {appointment.doctor.specialization}
-                              {appointment.hospital && ` • ${appointment.hospital.full_name}`}
-                            </p>
-                            <p className="text-sm text-gray-500 flex items-center">
-                              <Calendar className="w-4 h-4 mr-1" />
-                              {format(new Date(appointment.appointment_date), 'MMM dd, yyyy')} at {appointment.appointment_time}
-                            </p>
-                            {appointment.symptoms && (
-                              <p className="text-sm text-gray-600 mt-1">Symptoms: {appointment.symptoms}</p>
-                            )}
+                            <p className="font-medium text-arogya-dark-teal">Dr. Sarah Johnson</p>
+                            <p className="text-sm text-gray-600">Cardiology Specialist</p>
                           </div>
                         </div>
-                        <div className="flex items-center space-x-3">
-                          <Badge variant={appointment.status === 'scheduled' ? 'default' : 'secondary'}>
-                            {appointment.status}
-                          </Badge>
-                          {appointment.status === 'scheduled' && (
-                            <Button 
-                              size="sm" 
-                              onClick={() => handleJoinCall(appointment.id)}
-                              className="bg-arogya-dark-green hover:bg-arogya-light-green text-white"
-                            >
-                              <Video className="w-4 h-4 mr-2" />
-                              Join Call
+                        <Badge className="bg-red-500 text-white">LIVE</Badge>
+                      </div>
+                      <h3 className="font-semibold text-arogya-dark-teal mb-2">
+                        Heart Health Q&A Session
+                      </h3>
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center text-sm text-gray-600">
+                          <Users className="w-4 h-4 mr-1" />
+                          <span>234 watching</span>
+                        </div>
+                        <Button size="sm" className="bg-arogya-dark-green hover:bg-arogya-light-green">
+                          Join Stream
+                        </Button>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="text-arogya-dark-teal">Upcoming Streams</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="space-y-4">
+                      {upcomingStreams.map((stream, index) => (
+                        <div key={index} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                          <div className="flex-1">
+                            <h4 className="font-medium text-arogya-dark-teal">{stream.title}</h4>
+                            <p className="text-sm text-gray-600">{stream.doctor} • {stream.time}</p>
+                          </div>
+                          <div className="flex items-center space-x-2">
+                            <span className="text-sm text-gray-500">{stream.viewers} interested</span>
+                            <Button size="sm" variant="outline">
+                              <Bell className="w-3 h-3 mr-1" />
+                              Remind
                             </Button>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </CardContent>
+                </Card>
+              </div>
+
+              {/* Sidebar */}
+              <div className="space-y-6">
+                {/* Quick Actions */}
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="text-arogya-dark-teal">Quick Actions</CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-3">
+                    <Button className="w-full bg-arogya-dark-green hover:bg-arogya-light-green">
+                      <Search className="w-4 h-4 mr-2" />
+                      Find Doctors
+                    </Button>
+                    <Button variant="outline" className="w-full border-arogya-light-blue text-arogya-dark-teal">
+                      <MessageCircle className="w-4 h-4 mr-2" />
+                      Ask Question
+                    </Button>
+                    <Button variant="outline" className="w-full border-arogya-light-blue text-arogya-dark-teal">
+                      <BookOpen className="w-4 h-4 mr-2" />
+                      Health Library
+                    </Button>
+                  </CardContent>
+                </Card>
+
+                {/* Health Topics */}
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="text-arogya-dark-teal">Trending Topics</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="space-y-3">
+                      {healthTopics.map((topic, index) => (
+                        <div key={index} className="flex items-center justify-between">
+                          <div>
+                            <p className="font-medium text-arogya-dark-teal">{topic.name}</p>
+                            <p className="text-sm text-gray-600">{topic.posts} discussions</p>
+                          </div>
+                          {topic.trending && (
+                            <Badge variant="secondary" className="text-xs">
+                              Trending
+                            </Badge>
                           )}
                         </div>
-                      </div>
-                    ))
-                  )}
-                </div>
-              </CardContent>
-            </Card>
-          </TabsContent>
-
-          <TabsContent value="prescriptions">
-            <PrescriptionManagement 
-              prescriptions={prescriptions}
-              onRequestRefill={handleRefillRequest}
-            />
-          </TabsContent>
-
-          <TabsContent value="records">
-            <HealthRecordsUpload 
-              records={healthRecords}
-              onRecordsUpdate={refetchRecords}
-            />
-          </TabsContent>
-
-          <TabsContent value="vitals">
-            <Card>
-              <CardHeader>
-                <CardTitle>Vital Signs</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="grid md:grid-cols-3 gap-6">
-                  {Object.entries(vitals).map(([key, value]) => (
-                    <div key={key} className="text-center p-4 bg-arogya-light-blue rounded-lg">
-                      <h3 className="text-lg font-semibold text-arogya-dark-teal mb-2 capitalize">
-                        {key.replace(/([A-Z])/g, ' $1').trim()}
-                      </h3>
-                      <p className="text-2xl font-bold text-gray-900">{value}</p>
-                      <p className="text-sm text-gray-600 mt-1">Normal range</p>
+                      ))}
                     </div>
-                  ))}
-                </div>
-                <div className="mt-6 text-center">
-                  <p className="text-gray-600 mb-4">Last updated: Today</p>
-                  <Button variant="outline" className="border-arogya-dark-green text-arogya-dark-green">
-                    Update Vitals
-                  </Button>
-                </div>
-              </CardContent>
-            </Card>
+                  </CardContent>
+                </Card>
+              </div>
+            </div>
           </TabsContent>
 
-          <TabsContent value="emergency">
-            <Card>
-              <CardHeader>
-                <CardTitle className="text-red-600">Emergency Services</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="grid md:grid-cols-2 gap-6">
-                  <div className="space-y-4">
-                    <h3 className="font-semibold text-gray-900">Emergency Contacts</h3>
-                    <div className="space-y-3">
-                      <div className="flex items-center justify-between p-3 bg-red-50 rounded-lg">
-                        <div>
-                          <p className="font-medium text-red-800">Ambulance</p>
-                          <p className="text-red-600">+91-102</p>
+          <TabsContent value="discover">
+            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+              <Card className="text-center p-6">
+                <div className="w-16 h-16 bg-gradient-to-br from-arogya-dark-green to-arogya-light-green rounded-full flex items-center justify-center mx-auto mb-4">
+                  <Search className="w-8 h-8 text-white" />
+                </div>
+                <h3 className="text-lg font-semibold text-arogya-dark-teal mb-2">Explore Doctors</h3>
+                <p className="text-gray-600 mb-4">Find verified doctors by specialty and location</p>
+                <Button className="bg-arogya-dark-green hover:bg-arogya-light-green">
+                  Browse Doctors
+                </Button>
+              </Card>
+
+              <Card className="text-center p-6">
+                <div className="w-16 h-16 bg-gradient-to-br from-arogya-light-blue to-arogya-beige-yellow rounded-full flex items-center justify-center mx-auto mb-4">
+                  <Video className="w-8 h-8 text-arogya-dark-teal" />
+                </div>
+                <h3 className="text-lg font-semibold text-arogya-dark-teal mb-2">Live Streams</h3>
+                <p className="text-gray-600 mb-4">Watch live educational sessions and Q&As</p>
+                <Button variant="outline" className="border-arogya-dark-green text-arogya-dark-green">
+                  View Streams
+                </Button>
+              </Card>
+
+              <Card className="text-center p-6">
+                <div className="w-16 h-16 bg-gradient-to-br from-arogya-dark-green to-arogya-light-green rounded-full flex items-center justify-center mx-auto mb-4">
+                  <Users className="w-8 h-8 text-white" />
+                </div>
+                <h3 className="text-lg font-semibold text-arogya-dark-teal mb-2">Join Communities</h3>
+                <p className="text-gray-600 mb-4">Connect with others on similar health journeys</p>
+                <Button variant="outline" className="border-arogya-dark-green text-arogya-dark-green">
+                  Explore Topics
+                </Button>
+              </Card>
+            </div>
+          </TabsContent>
+
+          <TabsContent value="community">
+            <CommunityDashboard />
+          </TabsContent>
+
+          <TabsContent value="following">
+            <div className="space-y-6">
+              <Card>
+                <CardHeader>
+                  <CardTitle className="text-arogya-dark-teal">Doctors You Follow</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
+                    {followedDoctors.map((doctor, index) => (
+                      <div key={index} className="p-4 border border-gray-200 rounded-lg">
+                        <div className="flex items-center space-x-3 mb-3">
+                          <Avatar>
+                            <AvatarImage src={doctor.avatar || ''} />
+                            <AvatarFallback>
+                              {doctor.name.split(' ').map(n => n[0]).join('')}
+                            </AvatarFallback>
+                          </Avatar>
+                          <div className="flex-1">
+                            <p className="font-medium text-arogya-dark-teal">{doctor.name}</p>
+                            <p className="text-sm text-gray-600">{doctor.specialty}</p>
+                          </div>
+                          {doctor.isLive && (
+                            <Badge className="bg-red-500 text-white text-xs">LIVE</Badge>
+                          )}
                         </div>
-                        <Button 
-                          size="sm" 
-                          onClick={() => handleEmergencyCall('+91-102')}
-                          className="bg-red-600 hover:bg-red-700 text-white"
-                        >
-                          <Phone className="w-4 h-4 mr-2" />
-                          Call Now
-                        </Button>
-                      </div>
-                      <div className="flex items-center justify-between p-3 bg-blue-50 rounded-lg">
-                        <div>
-                          <p className="font-medium text-blue-800">Police</p>
-                          <p className="text-blue-600">+91-100</p>
+                        <div className="flex items-center justify-between">
+                          <span className="text-sm text-gray-500">{doctor.followers} followers</span>
+                          <Button size="sm" variant="outline">
+                            <MessageCircle className="w-3 h-3 mr-1" />
+                            Message
+                          </Button>
                         </div>
-                        <Button 
-                          size="sm" 
-                          onClick={() => handleEmergencyCall('+91-100')}
-                          className="bg-blue-600 hover:bg-blue-700 text-white"
-                        >
-                          <Phone className="w-4 h-4 mr-2" />
-                          Call Now
-                        </Button>
                       </div>
-                    </div>
+                    ))}
                   </div>
-                  <div>
-                    <h3 className="font-semibold text-gray-900 mb-4">Nearest Hospitals</h3>
-                    <div className="space-y-3">
-                      <div className="p-3 border rounded-lg">
-                        <p className="font-medium">AIIMS Delhi</p>
-                        <p className="text-sm text-gray-600 flex items-center">
-                          <MapPin className="w-4 h-4 mr-1" />
-                          2.5 km away • Emergency: +91-11-2658-8500
-                        </p>
-                        <Button 
-                          size="sm" 
-                          variant="outline" 
-                          className="mt-2"
-                          onClick={() => handleEmergencyCall('+91-11-2658-8500')}
-                        >
-                          Call Emergency
-                        </Button>
-                      </div>
-                      <div className="p-3 border rounded-lg">
-                        <p className="font-medium">Safdarjung Hospital</p>
-                        <p className="text-sm text-gray-600 flex items-center">
-                          <MapPin className="w-4 h-4 mr-1" />
-                          3.2 km away • Emergency: +91-11-2673-0000
-                        </p>
-                        <Button 
-                          size="sm" 
-                          variant="outline" 
-                          className="mt-2"
-                          onClick={() => handleEmergencyCall('+91-11-2673-0000')}
-                        >
-                          Call Emergency
-                        </Button>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
+                </CardContent>
+              </Card>
+            </div>
           </TabsContent>
         </Tabs>
       </div>
-
-      {/* Book Appointment Dialog */}
-      <Dialog open={showBookAppointment} onOpenChange={setShowBookAppointment}>
-        <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
-          <BookAppointment 
-            onSuccess={handleAppointmentSuccess}
-            onCancel={() => setShowBookAppointment(false)}
-          />
-        </DialogContent>
-      </Dialog>
-      
-      <Footer />
     </div>
   );
 };
