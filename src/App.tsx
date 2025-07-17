@@ -28,6 +28,9 @@ import Contact from "./pages/Contact";
 import Privacy from "./pages/Privacy";
 import Terms from "./pages/Terms";
 import HospitalDashboard from "./pages/HospitalDashboard";
+import Community from "./pages/Community";
+import Explore from "./pages/Explore";
+import DoctorProfile from "./pages/DoctorProfile";
 import Chatbot from "./components/Chatbot";
 
 const queryClient = new QueryClient();
@@ -88,6 +91,9 @@ const App = () => (
             <Route path="/team" element={<Team />} />
             <Route path="/subscription" element={<Subscription />} />
             <Route path="/payment-dashboard" element={<PaymentDashboard />} />
+            <Route path="/community" element={<Community />} />
+            <Route path="/explore" element={<Explore />} />
+            <Route path="/doctor/:id" element={<DoctorProfile />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
           <Chatbot />

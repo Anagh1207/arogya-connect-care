@@ -25,63 +25,63 @@ import {
 const Services = () => {
   const problems = [
     {
-      icon: <FileText className="w-8 h-8 text-red-500" />,
-      title: "Fragmented Patient Records",
-      before: "Medical records scattered across multiple hospitals, clinics, and labs - often lost or inaccessible during emergencies.",
-      after: "Complete digital health history accessible instantly from anywhere in India, ensuring continuity of care."
+      icon: <Brain className="w-8 h-8 text-red-500" />,
+      title: "Mental Health Stigma",
+      before: "People afraid to seek mental health support due to social stigma and lack of anonymous options.",
+      after: "Anonymous community support and professional counseling without judgment or disclosure fears."
     },
     {
       icon: <Clock className="w-8 h-8 text-orange-500" />,
-      title: "Delayed Medical Access",
-      before: "Hours wasted in queues, appointment booking confusion, and delayed access to specialist doctors.",
-      after: "Instant video consultations with certified doctors, smart appointment scheduling, and priority emergency access."
+      title: "Limited Access to Mental Health Care",
+      before: "Long waiting lists for therapists, expensive sessions, and limited availability in rural areas.",
+      after: "Instant access to mental health professionals, affordable counseling, and 24/7 crisis support."
     },
     {
       icon: <Users className="w-8 h-8 text-blue-500" />,
-      title: "Poor Doctor-Patient Communication",
-      before: "Limited consultation time, language barriers, and no follow-up mechanism after treatment.",
-      after: "Real-time communication tools, multilingual support, and continuous health monitoring with personalized guidance."
+      title: "Isolation and Lack of Community",
+      before: "People struggling alone with mental health issues, lacking peer support and understanding.",
+      after: "Vibrant support communities, peer-to-peer connections, and group therapy sessions for shared healing."
     },
     {
-      icon: <Brain className="w-8 h-8 text-purple-500" />,
-      title: "Lack of Data-Driven Insights",
-      before: "Healthcare decisions based on limited information, no predictive analysis for preventive care.",
-      after: "AI-powered health insights, early disease detection, and personalized treatment recommendations."
+      icon: <AlertTriangle className="w-8 h-8 text-purple-500" />,
+      title: "Crisis Intervention Gaps",
+      before: "Limited emergency mental health resources and delayed response during mental health crises.",
+      after: "Immediate crisis intervention, emergency counseling, and real-time professional support available."
     }
   ];
 
   const solutions = [
     {
-      icon: <Shield className="w-12 h-12 text-arogya-dark-green" />,
-      title: "Smart Digital Records",
-      description: "Secure, encrypted health records accessible across all healthcare providers in India.",
-      features: ["Blockchain-secured data", "Multi-language support", "Emergency access protocols", "Family health linkage"]
-    },
-    {
-      icon: <Zap className="w-12 h-12 text-arogya-dark-green" />,
-      title: "Real-Time Access",
-      description: "Instant access to medical history, test reports, and prescriptions from any device.",
-      features: ["24/7 availability", "Offline access", "QR code sharing", "Emergency contact alerts"]
-    },
-    {
       icon: <MessageCircle className="w-12 h-12 text-arogya-dark-green" />,
-      title: "Doctor-Patient Coordination",
-      description: "Seamless communication platform connecting patients with healthcare professionals.",
-      features: ["Video consultations", "Chat support", "Appointment reminders", "Follow-up tracking"]
+      title: "Anonymous Global Support Chat",
+      description: "Safe, anonymous chatrooms where you can share experiences and receive peer support.",
+      features: ["24/7 moderated support", "Anonymous identity protection", "Crisis intervention", "Peer counseling"]
     },
     {
       icon: <Brain className="w-12 h-12 text-arogya-dark-green" />,
-      title: "AI-Powered Insights",
-      description: "Intelligent health analytics for early detection and personalized care plans.",
-      features: ["Predictive analysis", "Risk assessment", "Treatment optimization", "Health recommendations"]
+      title: "Depression & Anxiety Tools",
+      description: "Evidence-based coping strategies, mood tracking, and therapeutic resources.",
+      features: ["Mood tracking", "Guided meditations", "CBT techniques", "Progress monitoring"]
+    },
+    {
+      icon: <Heart className="w-12 h-12 text-arogya-dark-green" />,
+      title: "Professional Counseling",
+      description: "Direct messaging with licensed mental health professionals and therapists.",
+      features: ["Licensed therapists", "Video consultations", "Personalized treatment", "Follow-up care"]
+    },
+    {
+      icon: <Users className="w-12 h-12 text-arogya-dark-green" />,
+      title: "Community Support Circles",
+      description: "Facilitated support groups and community-led healing circles for specific challenges.",
+      features: ["Group therapy sessions", "Peer support groups", "Topic-specific forums", "Community challenges"]
     }
   ];
 
   const impact = [
-    { metric: "2M+", label: "Patients Empowered", description: "Across rural and urban India" },
-    { metric: "50,000+", label: "Doctors Connected", description: "From AIIMS to PHCs" },
-    { metric: "85%", label: "Faster Diagnosis", description: "With instant record access" },
-    { metric: "₹500Cr+", label: "Healthcare Savings", description: "Through preventive care" }
+    { metric: "500K+", label: "Lives Supported", description: "Through anonymous communities" },
+    { metric: "1,000+", label: "Mental Health Professionals", description: "Available 24/7" },
+    { metric: "95%", label: "Crisis Response Rate", description: "Within 5 minutes" },
+    { metric: "80%", label: "Improved Wellbeing", description: "Reported by community members" }
   ];
 
   return (
@@ -92,11 +92,11 @@ const Services = () => {
       <div className="bg-gradient-to-br from-arogya-light-blue/30 via-white to-arogya-beige-yellow/20 py-20">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <h1 className="text-5xl font-bold text-arogya-dark-teal mb-6 animate-fade-in">
-            Transforming Healthcare in India
+            Mental Health Support & Community Care
           </h1>
           <p className="text-xl text-gray-600 max-w-4xl mx-auto mb-8 animate-fade-in">
-            Bridging the gap between patients and quality healthcare through innovative digital solutions. 
-            Making healthcare accessible, affordable, and efficient for every Indian.
+            Breaking mental health barriers through anonymous support, professional counseling, and collaborative healing communities. 
+            Making mental wellness accessible, affordable, and stigma-free for everyone.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center mt-8">
             <Button className="bg-arogya-dark-green hover:bg-arogya-teal text-white font-semibold px-8 py-3 rounded-xl transition-all duration-300 hover:scale-105">
@@ -114,8 +114,8 @@ const Services = () => {
       <div className="py-20 bg-gray-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
-            <h2 className="text-4xl font-bold text-arogya-dark-teal mb-4">Healthcare Challenges We Address</h2>
-            <p className="text-xl text-gray-600">Real problems faced by millions of Indians every day</p>
+            <h2 className="text-4xl font-bold text-arogya-dark-teal mb-4">Mental Health Challenges We Address</h2>
+            <p className="text-xl text-gray-600">Breaking down barriers to mental wellness and emotional support</p>
           </div>
 
           <div className="grid md:grid-cols-2 gap-8">
@@ -134,7 +134,7 @@ const Services = () => {
                   <div className="bg-red-50 border-l-4 border-red-400 p-4 rounded-r-lg">
                     <h4 className="font-semibold text-red-800 mb-2 flex items-center">
                       <AlertTriangle className="w-4 h-4 mr-2" />
-                      Before Arogya Connect Care
+                      Before Mental Health Support
                     </h4>
                     <p className="text-red-700 text-sm">{problem.before}</p>
                   </div>
@@ -157,8 +157,8 @@ const Services = () => {
       <div className="py-20 bg-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
-            <h2 className="text-4xl font-bold text-arogya-dark-teal mb-4">Innovative Solutions</h2>
-            <p className="text-xl text-gray-600">Technology-driven healthcare solutions designed for India</p>
+            <h2 className="text-4xl font-bold text-arogya-dark-teal mb-4">Mental Health Solutions</h2>
+            <p className="text-xl text-gray-600">Comprehensive mental wellness platform designed for everyone</p>
           </div>
 
           <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
@@ -195,8 +195,8 @@ const Services = () => {
       <div className="py-20 bg-gradient-to-r from-arogya-dark-teal to-arogya-teal">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
-            <h2 className="text-4xl font-bold text-white mb-4">Our Impact on Indian Healthcare</h2>
-            <p className="text-xl text-arogya-light-blue">Measurable change across the nation</p>
+            <h2 className="text-4xl font-bold text-white mb-4">Our Mental Health Impact</h2>
+            <p className="text-xl text-arogya-light-blue">Transforming lives through mental wellness support</p>
           </div>
 
           <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
@@ -218,17 +218,17 @@ const Services = () => {
       {/* Call to Action */}
       <div className="py-20 bg-arogya-light-blue/20">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <h2 className="text-4xl font-bold text-arogya-dark-teal mb-4">Ready to Transform Healthcare?</h2>
+          <h2 className="text-4xl font-bold text-arogya-dark-teal mb-4">Ready to Start Your Mental Wellness Journey?</h2>
           <p className="text-xl text-gray-600 mb-8 max-w-2xl mx-auto">
-            Join millions of Indians who have already experienced better healthcare through Arogya Connect Care.
+            Join thousands who have found support, healing, and community through our mental health platform.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Button className="bg-arogya-dark-green text-white hover:bg-arogya-teal font-semibold px-8 py-3 rounded-xl transition-all duration-300 hover:scale-105">
-              Start Your Health Journey
-              <TrendingUp className="w-4 h-4 ml-2" />
+              Join Community Support
+              <Heart className="w-4 h-4 ml-2" />
             </Button>
             <Button variant="outline" className="border-arogya-dark-green text-arogya-dark-green hover:bg-arogya-light-blue/20 font-semibold px-8 py-3 rounded-xl">
-              Speak to a Health Expert
+              Talk to a Counselor
             </Button>
           </div>
         </div>

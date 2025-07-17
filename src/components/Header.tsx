@@ -29,8 +29,10 @@ const Header = () => {
   const navLinks = [
     { href: '/', label: 'Home', icon: <Heart className="w-4 h-4" /> },
     { href: '/services', label: 'Services', icon: <Stethoscope className="w-4 h-4" /> },
-    { href: '/team', label: 'Team', icon: <Users className="w-4 h-4" /> },
+    { href: '/community', label: 'Community', icon: <Users className="w-4 h-4" /> },
+    { href: '/explore', label: 'Explore', icon: <MessageCircle className="w-4 h-4" /> },
     { href: '/emergency-services', label: 'Emergency', icon: <Phone className="w-4 h-4" /> },
+    { href: '/team', label: 'Team', icon: <Users className="w-4 h-4" /> },
     { href: '/contact', label: 'Contact', icon: <MessageCircle className="w-4 h-4" /> },
   ];
 
