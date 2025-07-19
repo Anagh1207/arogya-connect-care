@@ -151,7 +151,7 @@ const Explore = () => {
         ...stream,
         doctors: {
           ...stream.doctors,
-          profiles: (stream.doctors?.profiles && stream.doctors.profiles !== null && typeof stream.doctors.profiles === 'object' && !('error' in stream.doctors.profiles))
+          profiles: (stream.doctors?.profiles && typeof stream.doctors.profiles === 'object' && !Array.isArray(stream.doctors.profiles) && !('error' in stream.doctors.profiles))
             ? (stream.doctors.profiles as { full_name: string; avatar_url?: string })
             : {
                 full_name: 'Unknown Doctor',

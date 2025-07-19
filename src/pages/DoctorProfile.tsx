@@ -92,7 +92,7 @@ const DoctorProfile = () => {
       // Transform the data to match our interface
       const transformedDoctor = {
         ...data,
-        profiles: (data.profiles && data.profiles !== null && typeof data.profiles === 'object' && !('error' in data.profiles)) 
+        profiles: (data?.profiles && typeof data.profiles === 'object' && !Array.isArray(data.profiles) && !('error' in data.profiles)) 
           ? (data.profiles as { full_name: string; email: string; phone: string; avatar_url?: string })
           : {
               full_name: 'Unknown Doctor',
