@@ -8,6 +8,7 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AuthProvider } from "@/hooks/useAuth";
 import ProtectedRoute from "@/components/ProtectedRoute";
 import NewIndex from "./pages/NewIndex";
+import Dashboard from "./pages/Dashboard";
 import Feed from "./pages/Feed";
 import About from "./pages/About";
 import Login from "./pages/Login";
@@ -31,6 +32,7 @@ import HospitalDashboard from "./pages/HospitalDashboard";
 import Community from "./pages/Community";
 import Explore from "./pages/Explore";
 import DoctorProfile from "./pages/DoctorProfile";
+import StreamViewer from "./pages/StreamViewer";
 import Chatbot from "./components/Chatbot";
 
 const queryClient = new QueryClient();
@@ -44,6 +46,7 @@ const App = () => (
         <BrowserRouter>
           <Routes>
             <Route path="/" element={<NewIndex />} />
+            <Route path="/dashboard" element={<Dashboard />} />
             <Route path="/feed" element={<Feed />} />
             <Route path="/about" element={<About />} />
             <Route path="/services" element={<Services />} />
@@ -92,7 +95,8 @@ const App = () => (
             <Route path="/subscription" element={<Subscription />} />
             <Route path="/payment-dashboard" element={<PaymentDashboard />} />
             <Route path="/community" element={<Community />} />
-            <Route path="/explore" element={<Explore />} />
+            <Route path="/streams" element={<Explore />} />
+            <Route path="/stream/:id" element={<StreamViewer />} />
             <Route path="/doctor/:id" element={<DoctorProfile />} />
             <Route path="*" element={<NotFound />} />
           </Routes>

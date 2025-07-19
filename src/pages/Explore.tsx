@@ -63,7 +63,7 @@ interface Event {
   registered: number;
 }
 
-const Explore = () => {
+const Streams = () => {
   const [activeTab, setActiveTab] = useState('streams');
   const [searchTerm, setSearchTerm] = useState('');
   const [streams, setStreams] = useState<Stream[]>([]);
@@ -406,4 +406,4 @@ const Explore = () => {
   );
 };
 
-export default Explore;
+export default Streams;
