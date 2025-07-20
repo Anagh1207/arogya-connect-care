@@ -95,6 +95,7 @@ const App = () => (
             <Route path="/subscription" element={<Subscription />} />
             <Route path="/payment-dashboard" element={<PaymentDashboard />} />
             <Route path="/community" element={<Community />} />
+            <Route path="/explore" element={<Explore />} />
             <Route path="/streams" element={<Explore />} />
             <Route path="/stream/:id" element={<StreamViewer />} />
             <Route path="/doctor/:id" element={<DoctorProfile />} />
